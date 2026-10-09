@@ -306,3 +306,12 @@ test("solar film section stays responsive and uses a stock-footage disclosure",a
   await expect(page.locator(".film-disclaimer")).toContainText("להמחשה בלבד");
  }
 });
+
+
+test("solar showcase footage host responds with video instead of a broken URL",async({request})=>{
+ const url="https://videos.pexels.com/video-files/2249554/2249554-hd_1920_1080_25fps.mp4";
+ const response=await request.head(url,{timeout:30000});
+ expect(response.status(),"Solar media unavailable: "+url).toBeLessThan(400);
+ const type=response.headers()["content-type"]||"";
+ expect(type).toMatch(/video|octet-stream/i);
+});
