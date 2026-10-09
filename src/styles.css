@@ -221,3 +221,15 @@ html[dir=rtl] .hero-overlay{background:linear-gradient(0deg,#061a13d0,transparen
 @media(max-width:920px){:root{--shell:calc(100% - 40px)}.desktop-nav{display:none}.menu-toggle{display:block}.split,.foot-grid{grid-template-columns:1fr;gap:48px}.hero-bottom{flex-direction:column;align-items:start;gap:0}.vision-photo{max-width:600px}.vision-photo img{height:460px}.article-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.steps article:nth-child(2){border:0}.steps article:nth-child(-n+2){border-bottom:1px solid #becfbc}}
 @media(max-width:600px){:root{--shell:calc(100% - 32px)}.head-inner{min-height:72px}.mobile-menu{top:72px;max-height:calc(100dvh - 72px)}.logo{font-size:30px}.logo span{font-size:20px}.section{padding:74px 0}.hero{height:100svh;min-height:640px;max-height:850px}.hero-inner{padding-top:115px}.hero h1{font-size:clamp(44px,10.5vw,75px)}.hero-bottom p{font-size:14px}.actions{gap:8px}.actions .button{padding:11px 13px;gap:12px;font-size:11px}.section-heading h2{font-size:clamp(43px,10vw,66px)}.section-heading>p{font-size:15px}.cards,.article-grid,.gallery-grid,.scenarios,.steps,.search-bar,.compare-selects,.compare-grid,.fields,.results{grid-template-columns:1fr}.service-card{height:385px}.vision-photo img{height:325px;box-shadow:11px 13px 0 #dae6d8}.vision-seal{width:65px;height:65px;font-size:45px}.sun-art,.orbit-art{display:none}.lab{padding:20px}.area-label output{font-size:26px}.results strong{font-size:25px}.scenarios .scenario{height:285px}.gallery-photo{height:245px}.article-photo{height:225px}.page-hero{min-height:450px}.page-copy{padding:140px 0 55px}.page-copy h1{font-size:clamp(41px,10vw,68px)}.page-copy p{font-size:15px}.prose p{font-size:16px}.prose .lead{font-size:20px}.inquiry #lead-form{padding:22px}.foot-last{flex-direction:column}.floating-whatsapp{padding:15px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.hero-image img{transform:none}}
+
+/* QA fixes: do not position the honeypot 10,000px outside the visual viewport. */
+.honeypot{position:absolute!important;inset-inline-start:0!important;left:auto!important;top:0!important;width:1px!important;height:1px!important;overflow:clip!important;clip-path:inset(50%)!important;opacity:0!important;pointer-events:none!important}
+/* WCAG contrast corrections on light surfaces and the WhatsApp action. */
+.section-heading>p{color:#415b49}
+.lab-top span{color:#215b32}
+.tick{color:#3b5b45}
+.results small{color:#3b5743}
+.disclaimer{color:#3c5642}
+.article-body .eyebrow{color:#34573a}
+.article-body p{color:#3f5b48}
+.floating-whatsapp{background:#0c7339;color:#fff}
