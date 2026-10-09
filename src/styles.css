@@ -539,3 +539,19 @@ html[dir=rtl] .solar-story-shade{background:linear-gradient(0deg,#041910e8,#0419
 @media(max-width:900px){.film-heading{align-items:start;flex-direction:column}.film-preview{min-height:340px;aspect-ratio:1.1}.film-hero-play{width:84px;height:84px}.film-hero-play svg{width:30px}}
 @media(max-width:660px){.film-showcase{grid-template-columns:1fr;gap:34px}.film-heading h2{font-size:clamp(43px,12vw,66px)}.film-preview{min-height:325px;aspect-ratio:1.18}.film-preview-bottom{inset-inline:20px;bottom:22px;gap:14px}.film-tagline{font-size:clamp(27px,7vw,39px)}.film-topline{top:18px;inset-inline:18px;font-size:9px}.film-play-cta{padding:12px 15px}.film-count-chip{font-size:12px}.film-dialog video{max-height:70dvh}}
 @media(prefers-reduced-motion:reduce){.film-hero-play,.film-preview{transition:none}}
+
+
+/* Restore the unmistakable WhatsApp contact glyph without loading external icon fonts. */
+.floating-whatsapp{
+ display:flex;align-items:center;justify-content:center;
+ width:60px;height:60px;min-width:60px;min-height:60px;padding:0;
+ border-radius:50%;background:#0c7339;color:#fff;border:2px solid #fff;
+ bottom:calc(20px + env(safe-area-inset-bottom,0px));
+ box-shadow:0 8px 28px #00190d70,0 0 0 2px #0c733930;
+ line-height:1;transition:transform .25s ease,box-shadow .25s ease;
+}
+.floating-whatsapp-icon{display:block;width:32px;height:32px;flex:none}
+.floating-whatsapp:hover{transform:translateY(-4px) scale(1.06);box-shadow:0 14px 34px #00190d80,0 0 0 3px #0c733930}
+.floating-whatsapp:focus-visible{outline:3px solid #dafa73;outline-offset:4px}
+@media(max-width:600px){.floating-whatsapp{width:58px;height:58px;min-width:58px;min-height:58px;padding:0}.floating-whatsapp-icon{width:30px;height:30px}}
+@media(prefers-reduced-motion:reduce){.floating-whatsapp{transition:none}}
