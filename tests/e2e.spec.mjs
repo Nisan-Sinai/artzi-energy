@@ -332,3 +332,34 @@ test("both licensed stock MP4 files are compact and served by our own origin",as
   expect((await partial.body()).length).toBe(1024);
  }
 });
+
+
+test("floating WhatsApp button uses visible SVG logo, works in both locales and remains tappable on mobile",async({page})=>{
+ for(const locale of ["he","en"]){
+  for(const width of [320,390,1280]){
+   await page.setViewportSize({width,height:800});
+   await page.goto("/"+locale+"/");
+   const button=page.locator(".floating-whatsapp");
+   await expect(button).toBeVisible();
+   await expect(button).toHaveAttribute("href",/^https:\/\/wa\.me\/\d+\?text=.+/);
+   await expect(button).toHaveAttribute("target","_blank");
+   await expect(button).toHaveAttribute("rel",/noopener/);
+   const accessibleName=await button.getAttribute("aria-label");
+   expect(accessibleName?.length).toBeGreaterThan(2);
+   await expect(button.locator("svg.floating-whatsapp-icon[aria-hidden='true'] path")).toHaveCount(1);
+   expect((await button.locator("svg path").getAttribute("d"))?.length).toBeGreaterThan(400);
+   await expect(button).not.toHaveText("WA");
+   const bounds=await button.evaluate(el=>{
+    const b=el.getBoundingClientRect();
+    return {left:b.left,right:b.right,width:b.width,height:b.height,background:getComputedStyle(el).backgroundColor};
+   });
+   expect(bounds.width).toBeGreaterThanOrEqual(44);
+   expect(bounds.height).toBeGreaterThanOrEqual(44);
+   expect(bounds.left).toBeGreaterThanOrEqual(-1);
+   expect(bounds.right).toBeLessThanOrEqual(width+1);
+   expect(bounds.background).not.toBe("rgba(0, 0, 0, 0)");
+   await button.focus();
+   await expect(button).toBeFocused();
+  }
+ }
+});
