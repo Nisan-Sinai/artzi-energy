@@ -60,3 +60,35 @@ test("translated navigation, contact and privacy notices exist",()=>{
     assert.ok(t.consent.length>35);
   }
 });
+
+
+test("journal and guide routes contain unique original localized content, related links and indexable structure",async()=>{
+ const { articleCopy, guideCopy } = await import("../src/editorial.mjs");
+ for(const locale of ["he","en"]){
+  const titles=new Set();
+  for(const article of articleSpecs){
+   const slug=article[0],paragraphs=articleCopy[slug]?.[locale];
+   assert.equal(paragraphs?.length,3,slug+"/"+locale);
+   assert.ok(paragraphs.every(text=>text.length>100),slug+"/"+locale);
+   const html=await readFile(join("dist",locale,"insights",slug,"index.html"),"utf8");
+   assert.ok(html.includes('class="article-toc"'),slug);
+   assert.ok(html.includes('class="related-articles"'),slug);
+   assert.ok(html.includes('class="article-section"'),slug);
+   assert.ok(html.includes('class="share-article"'),slug);
+   assert.ok(html.includes("section-3"),slug);
+   assert.ok(html.includes('property="og:type" content="article"'),slug);
+   const title=article[locale==="he"?2:3];
+   assert.ok(html.includes('<title>'+title+'</title>'),slug+"/"+locale);
+   assert.ok(!titles.has(title),"article titles unique");
+   titles.add(title);
+  }
+  for(const guide of guideSpecs){
+   const slug=guide[0],paragraphs=guideCopy[slug]?.[locale];
+   assert.equal(paragraphs?.length,3,slug+"/"+locale);
+   assert.ok(paragraphs.every(text=>text.length>45),slug+"/"+locale);
+   const html=await readFile(join("dist",locale,"guides",slug,"index.html"),"utf8");
+   assert.ok(html.includes('class="steps guide-steps"'),slug);
+   assert.ok(html.includes(paragraphs[0].slice(0,20)),slug);
+  }
+ }
+});
