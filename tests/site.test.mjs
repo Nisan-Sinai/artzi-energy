@@ -74,7 +74,7 @@ test("journal and guide routes contain unique original localized content, relate
    assert.ok(html.includes('class="article-toc"'),slug);
    assert.ok(html.includes('class="related-articles"'),slug);
    assert.ok(html.includes('class="article-section"'),slug);
-   assert.ok(html.includes('class="share-article"'),slug);
+   assert.ok(html.includes('class="button dark share-article"'),slug);
    assert.ok(html.includes("section-3"),slug);
    assert.ok(html.includes('property="og:type" content="article"'),slug);
    const title=article[locale==="he"?2:3];
