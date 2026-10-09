@@ -132,7 +132,7 @@ function journalFeature(t,locale){
 }
 
 
-const solarFilmUrl="https://commons.wikimedia.org/wiki/Special:Redirect/file/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
+const solarFilmUrl="https://upload.wikimedia.org/wikipedia/commons/a/a2/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
 const solarFilmSource="https://commons.wikimedia.org/wiki/File:20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
 function solarFilm(t,locale){
  const he=locale==="he";
