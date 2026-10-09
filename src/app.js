@@ -30,6 +30,51 @@
   document.querySelectorAll("a.language").forEach(link=>link.addEventListener("click",()=>{
     try{localStorage.setItem("artzi-lang",lang==="he"?"en":"he")}catch{}
   }));
+  const phaseButtons=[...document.querySelectorAll('.roofstudio-tab[role="tab"]')];
+  if(phaseButtons.length){
+    const stage=document.getElementById("roofstudio-phase");
+    const stepLabel=document.getElementById("phase-label");
+    const description=document.getElementById("phase-description");
+    const panel=document.getElementById("roofstudio-panel");
+    const copy=lang==="he"?[
+      "מבינים את הנכס, הצרכים והמגבלות.",
+      "בוחנים צל, עומסים, תשתיות ואישורים.",
+      "מגבשים תוכנית ופועלים לפי אישורים מקצועיים.",
+      "חושבים גם על ביצועים ותחזוקה לטווח הארוך."
+    ]:[
+      "Understand the property, needs and limitations.",
+      "Review shade, structure, infrastructure and approvals.",
+      "Develop a plan and follow professional approvals.",
+      "Look ahead to performance and long-term maintenance."
+    ];
+    function selectPhase(index,focus=false){
+      for(let i=0;i<phaseButtons.length;i++){
+        const active=i===index;
+        phaseButtons[i].setAttribute("aria-selected",String(active));
+        phaseButtons[i].tabIndex=active?0:-1;
+      }
+      const number=String(index+1).padStart(2,"0");
+      if(stage)stage.textContent=number+" / 04";
+      if(stepLabel)stepLabel.textContent=number;
+      if(description)description.textContent=copy[index];
+      if(panel)panel.setAttribute("aria-labelledby",phaseButtons[index].id);
+      if(focus)phaseButtons[index].focus();
+    }
+    phaseButtons.forEach((button,index)=>{
+      button.addEventListener("click",()=>selectPhase(index));
+      button.addEventListener("keydown",event=>{
+        let next=index;
+        if(event.key==="ArrowRight"||event.key==="ArrowDown")next=(index+1)%phaseButtons.length;
+        else if(event.key==="ArrowLeft"||event.key==="ArrowUp")next=(index+phaseButtons.length-1)%phaseButtons.length;
+        else if(event.key==="Home")next=0;
+        else if(event.key==="End")next=phaseButtons.length-1;
+        else return;
+        event.preventDefault();
+        selectPhase(next,true);
+      });
+    });
+    selectPhase(0);
+  }
   const calc=document.querySelector("[data-calculator]");
   if(calc){
     const range=calc.querySelector("#roof-area");
