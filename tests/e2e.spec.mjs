@@ -224,3 +224,47 @@ test("article share action generates feedback and all bilingual practical guide 
   for(let n=0;n<3;n++)expect((await page.locator(".guide-steps article p").nth(n).textContent()).length).toBeGreaterThan(35);
  }
 });
+
+
+test("premium home showcases cinematic hero, editorial story and solar studio in both languages",async({page})=>{
+ for(const locale of ["he","en"]){
+  await page.goto("/"+locale+"/");
+  await expect(page.locator("section.cinematic-home h1")).toBeVisible();
+  await expect(page.locator(".studio-intro h2")).toBeVisible();
+  await expect(page.locator(".solar-story h2")).toBeVisible();
+  await expect(page.locator(".rooftop-studio h2")).toBeVisible();
+  await expect(page.locator(".journal-feature h2")).toBeVisible();
+  await expect(page.locator(".studio-value")).toHaveCount(3);
+  await expect(page.locator(".roofstudio-tab")).toHaveCount(4);
+  await expect(page.locator(".journal-small .article-card")).toHaveCount(3);
+  expect(await page.locator(".header-cta").getAttribute("href")).toBe("/"+locale+"/quote/");
+ }
+});
+test("solar atelier phase controls update content and support keyboard navigation",async({page})=>{
+ await page.goto("/he/");
+ const tabs=page.locator('.roofstudio-tab[role="tab"]');
+ await expect(page.locator("#roofstudio-phase")).toHaveText("01 / 04");
+ const before=await page.locator("#phase-description").textContent();
+ await tabs.nth(2).click();
+ await expect(page.locator("#roofstudio-phase")).toHaveText("03 / 04");
+ await expect(tabs.nth(2)).toHaveAttribute("aria-selected","true");
+ expect(await page.locator("#phase-description").textContent()).not.toBe(before);
+ await tabs.nth(2).focus();
+ await page.keyboard.press("ArrowRight");
+ await expect(page.locator("#roofstudio-phase")).toHaveText("04 / 04");
+ await expect(tabs.nth(3)).toBeFocused();
+ await page.keyboard.press("Home");
+ await expect(page.locator("#roofstudio-phase")).toHaveText("01 / 04");
+});
+test("solar atelier has no document overflow on typical phone widths and accessible home landmarks",async({page})=>{
+ for(const width of [320,375,390,430,768,1024,1440]){
+  await page.setViewportSize({width,height:844});
+  for(const locale of ["he","en"]){
+   await page.goto("/"+locale+"/");
+   const bounds=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
+   expect(bounds.doc,"Home overflow "+width+" "+locale).toBeLessThanOrEqual(bounds.viewport+2);
+   await expect(page.locator("main")).toHaveCount(1);
+   await expect(page.locator("h1")).toHaveCount(1);
+  }
+ }
+});
