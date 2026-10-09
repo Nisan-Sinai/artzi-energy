@@ -52,7 +52,7 @@ test("journal filtering and article navigation work",async({page})=>{
   await page.locator("#journal-search").fill("ממירים");
   await expect(page.locator(".article-card:visible")).toHaveCount(1);
   await page.locator(".article-card:visible").first().click();
-  await expect(page.locator("article.prose")).toBeVisible();
+  await expect(page.locator(".article-detail .prose")).toBeVisible();
 });
 test("quote flow validates required fields without sending an invalid lead",async({page})=>{
   await page.goto("/he/quote/");
