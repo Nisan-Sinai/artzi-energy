@@ -24,9 +24,7 @@ jobs:
           npm run lint
           npm run build
           npm test
-      - name: Supabase contact persistence smoke (synthetic QA lead)
-        env:
-          RUN_LIVE_SUBMISSION: "true"
+      - name: Supabase contact endpoint contract (non-destructive)
         run: node scripts/test-contact.mjs
       - name: Browser setup
         run: npx playwright install --with-deps chromium
