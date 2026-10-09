@@ -128,8 +128,8 @@ test("valid multistep lead is validated, serialized and confirms backend success
   await page.goto("/he/quote/");
   await page.locator('input[name="full_name"]').fill("בדיקה אוטומטית");
   await page.locator('input[name="email"]').fill("qa@example.com");
-  await page.locator("#next-step").click();
   await page.locator('select[name="property_type"]').selectOption("operations");
+  await page.locator("#next-step").click();
   await page.locator('textarea[name="message"]').fill("This is a browser test using a mocked API response");
   await page.locator("#next-step").click();
   await page.locator('input[name="consent"]').check();
