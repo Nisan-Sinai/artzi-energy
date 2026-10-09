@@ -161,3 +161,66 @@ test("PWA manifest, icons and service worker register successfully",async({page,
   });
   expect(registered).toBeTruthy();
 });
+
+
+test("journal search checks full articles and synchronizes a shareable URL",async({page})=>{
+ await page.goto("/he/insights/");
+ await expect(page.locator(".article-card")).toHaveCount(20);
+ await page.locator("#journal-search").fill("שלד");
+ const shown=await page.locator(".article-card:visible").count();
+ expect(shown).toBeGreaterThan(0);
+ expect(shown).toBeLessThan(20);
+ expect(new URL(page.url()).searchParams.get("q")).toBe("שלד");
+ await page.reload();
+ await expect(page.locator("#journal-search")).toHaveValue("שלד");
+ await expect(page.locator(".article-card:visible")).toHaveCount(shown);
+});
+test("journal categories, empty state, reset and browser back filter persistence",async({page})=>{
+ await page.goto("/en/insights/");
+ await page.locator("#journal-filter").selectOption("1");
+ const filtered=await page.locator(".article-card:visible").count();
+ expect(filtered).toBeGreaterThan(0);
+ expect(filtered).toBeLessThan(20);
+ expect(new URL(page.url()).searchParams.get("topic")).toBe("1");
+ await page.locator("#journal-search").fill("UNFINDABLEMAGAZINE12345");
+ await expect(page.locator("#journal-empty")).toBeVisible();
+ await expect(page.locator(".article-card:visible")).toHaveCount(0);
+ await page.locator("#journal-reset").click();
+ await expect(page.locator(".article-card:visible")).toHaveCount(20);
+ await expect(page.locator("#journal-reset")).toBeHidden();
+ expect(new URL(page.url()).searchParams.has("topic")).toBe(false);
+ await page.locator("#journal-search").fill("inverter");
+ await page.locator(".article-card:visible").first().click();
+ await page.locator(".breadcrumbs a[href*='/insights/']").click();
+ await expect(page.locator("#journal-search")).toHaveValue("inverter");
+});
+test("all articles have unique titles, original content, working TOC and related recommendations",async({page})=>{
+ const headings=[];
+ for(const locale of ["he","en"]){
+  for(const slug of ["roof-readiness","module-choice","inverters","future-of-solar"]){
+   await page.goto("/"+locale+"/insights/"+slug+"/");
+   const title=await page.title();
+   expect(title).not.toContain("ARTZI | insights");
+   headings.push(locale+title);
+   await expect(page.locator(".article-section")).toHaveCount(3);
+   await expect(page.locator(".article-toc a")).toHaveCount(3);
+   await expect(page.locator(".related-card")).toHaveCount(3);
+   const first=await page.locator(".article-section p").first().textContent();
+   expect(first.length).toBeGreaterThan(100);
+   await page.locator('.article-toc a[href="#section-2"]').click();
+   expect(new URL(page.url()).hash).toBe("#section-2");
+   await expect(page.locator(".article-share .share-article")).toBeVisible();
+  }
+ }
+ expect(new Set(headings).size).toBe(headings.length);
+});
+test("article share action generates feedback and all bilingual practical guide steps have original body",async({page})=>{
+ await page.goto("/he/insights/roof-readiness/");
+ await page.locator(".share-article").click();
+ await expect(page.locator("#share-feedback")).not.toBeEmpty();
+ for(const locale of ["he","en"]){
+  await page.goto("/"+locale+"/guides/start/");
+  await expect(page.locator(".guide-steps article")).toHaveCount(3);
+  for(let n=0;n<3;n++)expect((await page.locator(".guide-steps article p").nth(n).textContent()).length).toBeGreaterThan(35);
+ }
+});
