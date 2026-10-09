@@ -73,3 +73,45 @@ test("accessibility audit on both language homepages",async({page})=>{
     expect(results.violations.map(v=>v.id+" "+v.nodes.map(n=>n.target.join(",")).join(" | "))).toEqual([]);
   }
 });
+
+
+test("all generated routes stay within a 320 px viewport without horizontal document overflow",async({page})=>{
+  await page.setViewportSize({width:320,height:760});
+  for(const locale of ["he","en"]){
+    for(const route of routes){
+      const url="/"+locale+"/"+(route?route+"/":"");
+      await page.goto(url,{waitUntil:"domcontentloaded"});
+      const {scrollWidth,clientWidth}=await page.evaluate(()=>({
+        scrollWidth:document.documentElement.scrollWidth,
+        clientWidth:document.documentElement.clientWidth
+      }));
+      expect(scrollWidth,url+" at 320px").toBeLessThanOrEqual(clientWidth+2);
+    }
+  }
+});
+test("all page images on primary homepages load, and no JavaScript errors are thrown",async({page})=>{
+  const errors=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  for(const locale of ["he","en"]){
+    await page.goto("/"+locale+"/",{waitUntil:"domcontentloaded"});
+    const images=page.locator("img");
+    const count=await images.count();
+    for(let i=0;i<count;i++){
+      await images.nth(i).scrollIntoViewIfNeeded();
+      await images.nth(i).evaluate(img=>img.decode().catch(()=>{}));
+      const data=await images.nth(i).evaluate(img=>({complete:img.complete,width:img.naturalWidth,src:img.src}));
+      expect(data.width,data.src).toBeGreaterThan(0);
+    }
+  }
+  expect(errors).toEqual([]);
+});
+test("automated accessibility on distinct public page templates in both locales",async({page})=>{
+  const templates=["about","solutions","projects","gallery","technology","process","calculator","compare","faq","insights","guides","contact","quote","privacy","accessibility","terms","solutions/residential","technology/modules","insights/roof-readiness","guides/start"];
+  for(const locale of ["he","en"]){
+    for(const route of templates){
+      await page.goto("/"+locale+"/"+route+"/",{waitUntil:"domcontentloaded"});
+      const results=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
+      expect(results.violations.map(v=>v.id+": "+v.nodes.map(n=>n.target.join(" ")).join("; ")),locale+"/"+route).toEqual([]);
+    }
+  }
+});
