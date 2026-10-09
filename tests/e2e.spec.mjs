@@ -281,7 +281,6 @@ test("solar motion film actually animates, pauses, replays and closes accessibly
   const toggle=page.locator("#solar-film-toggle");
   await expect(preview).toBeVisible();
   await expect(dialog).not.toBeVisible();
-  await expect(film).toHaveAttribute("data-play-state","paused").catch(()=>{}); // Initial frame is drawn before playback.
   await preview.click();
   await expect(dialog).toBeVisible();
   await expect(page.locator("#close-solar-film")).toBeFocused();
@@ -311,13 +310,13 @@ test("solar motion film actually animates, pauses, replays and closes accessibly
   await expect(dialog).not.toBeVisible();
  }
 });
-test("solar film section stays responsive and uses a stock-footage disclosure",async({page})=>{
+test("solar film section stays responsive and clearly labels the original animation",async({page})=>{
  for(const width of [320,375,390,768,1024,1440]){
   await page.setViewportSize({width,height:850});
   await page.goto("/he/");
   const box=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
   expect(box.scroll,"Video showcase overflow at "+width+"px").toBeLessThanOrEqual(box.viewport+2);
-  await expect(page.locator(".film-disclaimer")).toContainText("להמחשה בלבד");
+  await expect(page.locator(".film-disclaimer")).toContainText("אנימציה מקורית להמחשה");
  }
 });
 
