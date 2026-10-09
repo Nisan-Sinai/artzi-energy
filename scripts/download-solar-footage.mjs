@@ -15,6 +15,13 @@ if(!ffmpeg)throw Error("MP4 transcoding unavailable: ffmpeg-static missing");
 for(const clip of clips){
  const original=join(folder,clip.id+"-source.mp4");
  const output=join(folder,clip.file);
+ try{
+  const existing=await stat(output);
+  if(existing.size>=80000 && existing.size<15*1024*1024){
+   const head=(await readFile(output)).toString("ascii",4,8);
+   if(head==="ftyp"){console.log("VIDEO VERIFIED (cached):",clip.file,"bytes="+existing.size);continue;}
+  }
+ }catch{}
  const controller=new AbortController();
  const timer=setTimeout(()=>controller.abort(),90000);
  try{
