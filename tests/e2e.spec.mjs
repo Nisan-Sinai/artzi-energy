@@ -139,3 +139,25 @@ test("valid multistep lead is validated, serialized and confirms backend success
   expect(payload?.consent).toBe(true);
   expect(payload?.full_name).toBe("בדיקה אוטומטית");
 });
+
+
+test("PWA manifest, icons and service worker register successfully",async({page,request})=>{
+  const manifestResponse=await request.get("/manifest.webmanifest");
+  expect(manifestResponse.ok()).toBeTruthy();
+  const manifest=await manifestResponse.json();
+  expect(manifest.display).toBe("standalone");
+  expect(manifest.icons.map(i=>i.sizes)).toContain("192x192");
+  expect(manifest.icons.map(i=>i.sizes)).toContain("512x512");
+  for(const image of manifest.icons){
+    const res=await request.get(image.src);
+    expect(res.status(),image.src).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/png");
+  }
+  await page.goto("/he/",{waitUntil:"load"});
+  const registered=await page.evaluate(async()=>{
+    if(!("serviceWorker" in navigator))return false;
+    await navigator.serviceWorker.ready;
+    return navigator.serviceWorker.getRegistrations().then(r=>r.some(x=>x.active?.scriptURL.endsWith("/sw.js")));
+  });
+  expect(registered).toBeTruthy();
+});
