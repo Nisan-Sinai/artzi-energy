@@ -78,7 +78,8 @@ function details(t,locale,a,i) {
  const homeLabel=isHebrew?"עמוד הבית":"Home";
  const articleSections=copy.map((paragraph,n)=>'<section id="section-'+(n+1)+'" class="article-section"><h2>'+words(a[sectionOffset+n*2])+'</h2><p>'+words(paragraph)+'</p></section>').join("");
  const sameCategory=articleSpecs.map((item,idx)=>({item,idx})).filter(x=>x.item[0]!==slug && x.item[1]===a[1]).slice(0,3);
- const related=(sameCategory.length?sameCategory:articleSpecs.map((item,idx)=>({item,idx})).filter(x=>x.item[0]!==slug).slice(0,3)).map(({item,idx})=>'<a class="related-card" href="'+url(locale,"insights/"+item[0])+'">'+image(idx+1,"")+'<span>'+words(item[isHebrew?2:3])+' <b aria-hidden="true">↗</b></span></a>').join("");
+ const relatedPicks=[...sameCategory,...articleSpecs.map((item,idx)=>({item,idx})).filter(x=>x.item[0]!==slug && !sameCategory.some(y=>y.item[0]===x.item[0]))].slice(0,3);
+ const related=relatedPicks.map(({item,idx})=>'<a class="related-card" href="'+url(locale,"insights/"+item[0])+'">'+image(idx+1,"")+'<span>'+words(item[isHebrew?2:3])+' <b aria-hidden="true">↗</b></span></a>').join("");
  const pos=articleSpecs.indexOf(a);
  const near='<div class="article-neighbors">'+(pos>0?link(locale,"insights/"+articleSpecs[pos-1][0],(isHebrew?"הקודם":"Previous")+': '+words(articleSpecs[pos-1][isHebrew?2:3]),"neighbor"):'<span></span>')+(pos<articleSpecs.length-1?link(locale,"insights/"+articleSpecs[pos+1][0],(isHebrew?"הבא":"Next")+': '+words(articleSpecs[pos+1][isHebrew?2:3]),"neighbor"):'<span></span>')+'</div>';
  return heroPage(t,title,t.articleLabel,a[sectionOffset],i+1,"FIELD NOTES / "+String(i+1).padStart(2,"0"))+
