@@ -17,6 +17,8 @@ jobs:
           node-version: '22'
       - name: Install
         run: npm install --no-audit --no-fund
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
       - name: Syntax and static build
         run: |
           npm run lint
