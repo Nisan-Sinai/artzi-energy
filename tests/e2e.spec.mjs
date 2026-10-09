@@ -272,66 +272,63 @@ test("solar atelier has no document overflow on typical phone widths and accessi
 });
 
 
-test("solar motion film actually animates, pauses, replays and closes accessibly",async({page})=>{
+test("both real solar MP4 clips actually decode, start playback, and close accessibly",async({page})=>{
  for(const lang of ["he","en"]){
   await page.goto("/"+lang+"/");
-  const preview=page.locator("#open-solar-film");
+  const previews=page.locator(".film-preview[data-film-src]");
   const dialog=page.locator("#solar-film-dialog");
-  const film=page.locator("#solar-film-canvas");
-  const toggle=page.locator("#solar-film-toggle");
-  await expect(preview).toBeVisible();
+  const player=page.locator("#solar-real-video");
+  await expect(previews).toHaveCount(2);
   await expect(dialog).not.toBeVisible();
-  await preview.click();
-  await expect(dialog).toBeVisible();
-  await expect(page.locator("#close-solar-film")).toBeFocused();
-  await expect(film).toHaveAttribute("data-play-state","playing");
-  const first=await film.getAttribute("data-frame");
-  await expect.poll(async()=>film.getAttribute("data-frame"),{timeout:5000}).not.toBe(first);
-  const frameA=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
-  await page.waitForTimeout(250);
-  const frameB=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
-  expect(frameB).not.toBe(frameA);
-  await toggle.click();
-  await expect(film).toHaveAttribute("data-play-state","paused");
-  await expect(toggle).toHaveAttribute("aria-pressed","false");
-  const frozen=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
-  await page.waitForTimeout(250);
-  expect(await film.evaluate(canvas=>canvas.toDataURL("image/png"))).toBe(frozen);
-  await page.locator("#solar-film-replay").click();
-  await expect(film).toHaveAttribute("data-play-state","playing");
-  await expect(page.locator("#solar-film-time")).toContainText("00:00");
-  await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(preview).toBeFocused();
-  await expect(film).toHaveAttribute("data-play-state","paused");
-  await preview.click();
-  await expect(dialog).toBeVisible();
-  await page.locator("#close-solar-film").click();
-  await expect(dialog).not.toBeVisible();
+  for(const [index,name] of [[0,"solar-rooftop.mp4"],[1,"solar-city.mp4"]]){
+   const preview=previews.nth(index);
+   await expect(preview.locator(".film-play-cta")).toBeVisible();
+   await expect(preview).toHaveAttribute("aria-haspopup","dialog");
+   const requests=[];
+   page.on("request",request=>{if(request.url().includes(".mp4"))requests.push(request.url())});
+   await preview.click();
+   await expect(dialog).toBeVisible();
+   await expect(page.locator("#close-solar-film")).toBeFocused();
+   await expect(player).toHaveAttribute("src","/media/"+name);
+   await expect.poll(()=>player.evaluate(v=>v.videoWidth>0 && v.videoHeight>0 && v.readyState>=2),{timeout:20000}).toBe(true);
+   await expect.poll(()=>player.evaluate(v=>v.currentTime),{timeout:12000}).toBeGreaterThan(0.15);
+   await expect(player).toHaveAttribute("data-media-ready","true");
+   expect(requests.some(url=>url.includes("/media/"+name))).toBeTruthy();
+   await page.keyboard.press("Escape");
+   await expect(dialog).not.toBeVisible();
+   await expect(preview).toBeFocused();
+   await expect(player).not.toHaveAttribute("src",/./);
+   await expect(player).toHaveAttribute("data-media-ready","idle");
+  }
  }
 });
-test("solar film section stays responsive and clearly labels the original animation",async({page})=>{
+test("solar film section stays responsive and clearly labels stock drone footage",async({page})=>{
  for(const width of [320,375,390,768,1024,1440]){
   await page.setViewportSize({width,height:850});
   await page.goto("/he/");
   const box=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
   expect(box.scroll,"Video showcase overflow at "+width+"px").toBeLessThanOrEqual(box.viewport+2);
-  await expect(page.locator(".film-disclaimer")).toContainText("אנימציה מקורית להמחשה");
+  await expect(page.locator(".film-disclaimer")).toContainText("צילומי מאגר להמחשה");
  }
 });
 
 
-test("solar film has no remote media dependency and is delivered as a local asset",async({page,request})=>{
- const script=await request.get("/solar-film.js");
- expect(script.ok()).toBeTruthy();
- expect(await script.text()).toContain("function draw(t)");
+test("both licensed stock MP4 files are compact and served by our own origin",async({request,page})=>{
  await page.goto("/he/");
- const mediaRequests=[];
- page.on("request",r=>{
-   if(/upload\.wikimedia\.org|videos\.pexels\.com|\.webm(\?|$)|\.mp4(\?|$)/i.test(r.url()))mediaRequests.push(r.url());
- });
- await page.locator("#open-solar-film").click();
- await expect(page.locator("#solar-film-canvas")).toHaveAttribute("data-play-state","playing");
- await page.waitForTimeout(350);
- expect(mediaRequests).toEqual([]);
+ const videoRequests=[];
+ page.on("request",req=>{if(req.url().includes(".mp4"))videoRequests.push(req.url())});
+ await page.waitForTimeout(300);
+ expect(videoRequests).toEqual([]); // no costly preloading
+ for(const name of ["solar-rooftop.mp4","solar-city.mp4"]){
+  const response=await request.get("/media/"+name);
+  expect(response.ok()).toBeTruthy();
+  expect(response.headers()["content-type"]).toMatch(/video\/mp4/);
+  const bytes=await response.body();
+  expect(bytes.length).toBeGreaterThan(80000);
+  expect(bytes.length).toBeLessThan(15*1024*1024);
+  expect(bytes.subarray(4,8).toString("ascii")).toBe("ftyp");
+  const partial=await request.get("/media/"+name,{headers:{"Range":"bytes=0-1023"}});
+  expect(partial.status()).toBe(206);
+  expect((await partial.body()).length).toBe(1024);
+ }
 });
