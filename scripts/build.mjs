@@ -132,8 +132,6 @@ function journalFeature(t,locale){
 }
 
 
-const solarFilmUrl="https://upload.wikimedia.org/wikipedia/commons/a/a2/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
-const solarFilmSource="https://commons.wikimedia.org/wiki/File:20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
 function solarFilm(t,locale){
  const he=locale==="he";
  const playLabel=he?"נגן סרטון אנרגיה סולארית":"Play solar energy film";
@@ -141,8 +139,10 @@ function solarFilm(t,locale){
  const title=he?"אנרגיה שלא רק רואים.":"Energy you can see.";
  const accent=he?"מרגישים.":"Feel it.";
  const subtitle=he?"כמה שניות של השראה — גגות, אור וחשיבה חדשה.":"A visual story of rooftops, light and a brighter perspective.";
- const note=he?"צילום USDA להמחשה בלבד • אינו פרויקט של ארצי אנרגיה":"USDA footage for illustration • Not an Artzi Energy project";
- const fallback=he?"הסרטון לא נפתח? לצפייה במקור":"Video unavailable? Open the source";
+ const note=he?"אנימציה מקורית להמחשה • אינה תיעוד של פרויקט שביצעה החברה":"Original motion illustration • Not footage of a completed project";
+ const replayLabel=he?"ניגון מחדש":"Replay";
+ const pauseLabel=he?"השהיה":"Pause";
+ const filmAccessible=he?"אנימציה סולארית המדגימה מעבר מאור שמש למערכת פאנלים ולבית מחובר":"Solar motion illustration showing sunlight, panels and a connected home";
  return '<section class="section film-section" aria-labelledby="film-title"><div class="container film-layout">'+
  '<div class="film-copy"><span class="eyebrow">ARTZI / MOTION STORY — 006</span><h2 id="film-title">'+title+'<br><em>'+accent+'</em></h2><p>'+words(subtitle)+'</p>'+
  '<div class="film-index"><span>01 <span aria-hidden="true">/</span> 03</span><span>INSPIRED BY LIGHT</span></div>'+
@@ -155,10 +155,11 @@ function solarFilm(t,locale){
  '<span class="film-preview-bottom"><span class="film-tagline">SOLAR<br><em>REIMAGINED.</em></span><span class="film-play" aria-hidden="true"><svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></span>'+
  '</button><div class="film-caption"><span>'+note+'</span><span>WATCH THE FILM <span aria-hidden="true">↗</span></span></div></div>'+
  '</div></section>'+
- '<dialog class="film-dialog" id="solar-film-dialog" aria-label="'+playLabel+'" data-solar-film-url="'+solarFilmUrl+'">'+
+ '<dialog class="film-dialog" id="solar-film-dialog" aria-label="'+playLabel+'">'+
  '<div class="film-dialog-inner"><button type="button" class="film-close" aria-label="'+closeLabel+'" id="close-solar-film">✕</button>'+
- '<video id="solar-film-video" controls playsinline preload="none" tabindex="0" aria-label="'+playLabel+'"></video>'+
- '<div class="film-dialog-footer"><span>'+note+'</span><a href="'+solarFilmSource+'" target="_blank" rel="noopener noreferrer">'+fallback+' ↗</a></div></div></dialog>';
+ '<div class="film-canvas-shell"><canvas width="960" height="540" id="solar-film-canvas" role="img" aria-label="'+filmAccessible+'">'+filmAccessible+'</canvas></div>'+
+ '<div class="film-control-bar"><div class="film-progress" aria-hidden="true"><span id="solar-film-progress"></span></div><div class="film-actions"><button type="button" id="solar-film-toggle" aria-pressed="false">'+pauseLabel+' ❚❚</button><button type="button" id="solar-film-replay">'+replayLabel+' ↻</button><span id="solar-film-time" aria-hidden="true">00:00 / 00:12</span></div></div>'+
+ '<div class="film-dialog-footer"><span id="solar-film-scene">'+(he?"האור מתחיל כאן":"It starts with sunlight")+'</span><span>'+note+'</span></div></div></dialog>';
 }
 
 function page(t,locale,slug){
@@ -212,7 +213,7 @@ function chrome(locale,route,t,body){
  const ogType=currentArticle?"article":"website";
  const ogPhoto=currentArticle?photos[(articleSpecs.indexOf(currentArticle)+1)%photos.length]:photos[0];
  const canonical=baseUrl+url(locale,route);
- return '<!doctype html><html lang="'+locale+'" dir="'+t.dir+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#071c16"><meta name="description" content="'+desc+'"><meta name="robots" content="noindex,nofollow"><meta property="og:type" content="'+ogType+'"><meta property="og:title" content="'+completeTitle+'"><meta property="og:description" content="'+desc+'"><meta property="og:image" content="'+ogPhoto+'"><link rel="canonical" href="'+canonical+'"><link rel="alternate" hreflang="he-IL" href="'+baseUrl+url("he",route)+'"><link rel="alternate" hreflang="en" href="'+baseUrl+url("en",route)+'"><link rel="alternate" hreflang="x-default" href="'+baseUrl+url("he",route)+'"><link rel="preconnect" href="https://images.unsplash.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/styles.css"><title>'+completeTitle+'</title></head><body><a href="#main" class="skip">'+words(t.skip)+'</a><div class="progress" id="progress"></div>'+nav+'<main id="main">'+body+'</main>'+footer+'<a class="floating-whatsapp" href="'+wa(t)+'" target="_blank" rel="noopener noreferrer" aria-label="'+words(t.whatsapp)+'">WA</a><script src="/app.js" defer></script></body></html>';
+ return '<!doctype html><html lang="'+locale+'" dir="'+t.dir+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#071c16"><meta name="description" content="'+desc+'"><meta name="robots" content="noindex,nofollow"><meta property="og:type" content="'+ogType+'"><meta property="og:title" content="'+completeTitle+'"><meta property="og:description" content="'+desc+'"><meta property="og:image" content="'+ogPhoto+'"><link rel="canonical" href="'+canonical+'"><link rel="alternate" hreflang="he-IL" href="'+baseUrl+url("he",route)+'"><link rel="alternate" hreflang="en" href="'+baseUrl+url("en",route)+'"><link rel="alternate" hreflang="x-default" href="'+baseUrl+url("he",route)+'"><link rel="preconnect" href="https://images.unsplash.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/styles.css"><title>'+completeTitle+'</title></head><body><a href="#main" class="skip">'+words(t.skip)+'</a><div class="progress" id="progress"></div>'+nav+'<main id="main">'+body+'</main>'+footer+'<a class="floating-whatsapp" href="'+wa(t)+'" target="_blank" rel="noopener noreferrer" aria-label="'+words(t.whatsapp)+'">WA</a><script src="/app.js" defer></script><script src="/solar-film.js" defer></script></body></html>';
 }
 function crc32(buffer){
  let crc = 0xffffffff;
@@ -253,6 +254,7 @@ for(const locale of ["he","en"]) {
 await write("index.html",'<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/he/"><title>ארצי אנרגיה</title></head><body><a href="/he/">ארצי אנרגיה</a></body></html>');
 await write("styles.css",await (await import("node:fs/promises")).readFile("src/styles.css","utf8"));
 await write("app.js",await (await import("node:fs/promises")).readFile("src/app.js","utf8"));
+await write("solar-film.js",await (await import("node:fs/promises")).readFile("src/solar-film.js","utf8"));
 await write("favicon.svg",'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="35" fill="#071c16"/><circle cx="96" cy="96" r="34" stroke="#dcfc6c" stroke-width="8" fill="none"/><path d="M96 17v31m0 96v31M17 96h31m96 0h31M40 40l22 22m68 68 22 22m0-112-22 22M62 130l-22 22" stroke="#dcfc6c" stroke-width="8" stroke-linecap="round"/></svg>');
 await write("icon-192.png",iconPng(192));
 await write("icon-512.png",iconPng(512));
@@ -260,4 +262,4 @@ await write("manifest.webmanifest",JSON.stringify({name:"Artzi Energy — ארצ
 await write("robots.txt","User-agent: *\nDisallow: /\nSitemap: "+baseUrl+"/sitemap.xml\n");
 await write("sitemap.xml",'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+allLinks.map(x=>'<url><loc>'+baseUrl+x+'</loc></url>').join('')+'</urlset>');
 await write("sw.js",'const CACHE="artzi-preview-v1";const urls=["/","/he/","/en/","/styles.css","/app.js"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(urls)));self.skipWaiting()});self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});self.addEventListener("fetch",e=>{if(e.request.method!=="GET"||new URL(e.request.url).origin!==location.origin)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{})}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match("/he/"))))})');
-console.log(JSON.stringify({routesPerLocale:routes.length,totalHtml:allLinks.length,assets:7}));
+console.log(JSON.stringify({routesPerLocale:routes.length,totalHtml:allLinks.length,assets:8}));

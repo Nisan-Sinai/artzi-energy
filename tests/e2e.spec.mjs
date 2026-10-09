@@ -272,46 +272,66 @@ test("solar atelier has no document overflow on typical phone widths and accessi
 });
 
 
-test("cinematic solar video opens in a real accessible player only after click",async({page})=>{
+test("solar motion film actually animates, pauses, replays and closes accessibly",async({page})=>{
  for(const lang of ["he","en"]){
   await page.goto("/"+lang+"/");
   const preview=page.locator("#open-solar-film");
   const dialog=page.locator("#solar-film-dialog");
-  const player=page.locator("#solar-film-video");
+  const film=page.locator("#solar-film-canvas");
+  const toggle=page.locator("#solar-film-toggle");
   await expect(preview).toBeVisible();
   await expect(dialog).not.toBeVisible();
-  expect(await player.getAttribute("src")).toBeNull();
   await preview.click();
   await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveAttribute("open","");
-  await expect(player).toHaveAttribute("controls","");
-  expect(await player.getAttribute("src")).toContain("upload.wikimedia.org/wikipedia/commons/");
   await expect(page.locator("#close-solar-film")).toBeFocused();
+  await expect(film).toHaveAttribute("data-play-state","playing");
+  const first=await film.getAttribute("data-frame");
+  await expect.poll(async()=>film.getAttribute("data-frame"),{timeout:5000}).not.toBe(first);
+  const frameA=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
+  await page.waitForTimeout(250);
+  const frameB=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
+  expect(frameB).not.toBe(frameA);
+  await toggle.click();
+  await expect(film).toHaveAttribute("data-play-state","paused");
+  await expect(toggle).toHaveAttribute("aria-pressed","false");
+  const frozen=await film.evaluate(canvas=>canvas.toDataURL("image/png"));
+  await page.waitForTimeout(250);
+  expect(await film.evaluate(canvas=>canvas.toDataURL("image/png"))).toBe(frozen);
+  await page.locator("#solar-film-replay").click();
+  await expect(film).toHaveAttribute("data-play-state","playing");
+  await expect(page.locator("#solar-film-time")).toContainText("00:00");
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
-  await expect.poll(()=>player.getAttribute("src")).toBeNull();
   await expect(preview).toBeFocused();
+  await expect(film).toHaveAttribute("data-play-state","paused");
   await preview.click();
   await expect(dialog).toBeVisible();
   await page.locator("#close-solar-film").click();
   await expect(dialog).not.toBeVisible();
  }
 });
-test("solar film section stays responsive and uses a stock-footage disclosure",async({page})=>{
+test("solar film section stays responsive and clearly labels the original animation",async({page})=>{
  for(const width of [320,375,390,768,1024,1440]){
   await page.setViewportSize({width,height:850});
   await page.goto("/he/");
   const box=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
   expect(box.scroll,"Video showcase overflow at "+width+"px").toBeLessThanOrEqual(box.viewport+2);
-  await expect(page.locator(".film-disclaimer")).toContainText("להמחשה בלבד");
+  await expect(page.locator(".film-disclaimer")).toContainText("אנימציה מקורית להמחשה");
  }
 });
 
 
-test("solar showcase footage host responds with video instead of a broken URL",async({request})=>{
- const url="https://upload.wikimedia.org/wikipedia/commons/a/a2/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
- const response=await request.head(url,{timeout:30000});
- expect(response.status(),"Solar media unavailable: "+url).toBeLessThan(400);
- const type=response.headers()["content-type"]||"";
- expect(type).toMatch(/video|octet-stream/i);
+test("solar film has no remote media dependency and is delivered as a local asset",async({page,request})=>{
+ const script=await request.get("/solar-film.js");
+ expect(script.ok()).toBeTruthy();
+ expect(await script.text()).toContain("function draw(t)");
+ await page.goto("/he/");
+ const mediaRequests=[];
+ page.on("request",r=>{
+   if(/upload\.wikimedia\.org|videos\.pexels\.com|\.webm(\?|$)|\.mp4(\?|$)/i.test(r.url()))mediaRequests.push(r.url());
+ });
+ await page.locator("#open-solar-film").click();
+ await expect(page.locator("#solar-film-canvas")).toHaveAttribute("data-play-state","playing");
+ await page.waitForTimeout(350);
+ expect(mediaRequests).toEqual([]);
 });
