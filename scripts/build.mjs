@@ -134,8 +134,8 @@ for(const locale of ["he","en"]) {
  }
 }
 await write("index.html",'<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/he/"><title>ארצי אנרגיה</title></head><body><a href="/he/">ארצי אנרגיה</a></body></html>');
-await write("styles.css",(await import("node:fs/promises")).readFile("src/styles.css","utf8"));
-await write("app.js",(await import("node:fs/promises")).readFile("src/app.js","utf8"));
+await write("styles.css",await (await import("node:fs/promises")).readFile("src/styles.css","utf8"));
+await write("app.js",await (await import("node:fs/promises")).readFile("src/app.js","utf8"));
 await write("favicon.svg",'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="35" fill="#071c16"/><circle cx="96" cy="96" r="34" stroke="#dcfc6c" stroke-width="8" fill="none"/><path d="M96 17v31m0 96v31M17 96h31m96 0h31M40 40l22 22m68 68 22 22m0-112-22 22M62 130l-22 22" stroke="#dcfc6c" stroke-width="8" stroke-linecap="round"/></svg>');
 await write("icon-192.png",iconPng(192));
 await write("icon-512.png",iconPng(512));
