@@ -30,6 +30,39 @@
   document.querySelectorAll("a.language").forEach(link=>link.addEventListener("click",()=>{
     try{localStorage.setItem("artzi-lang",lang==="he"?"en":"he")}catch{}
   }));
+
+  // Video is created only on demand, as in the arrival-confirmations demo.
+  const filmDialog=document.getElementById("solar-film-dialog");
+  const openFilm=document.getElementById("open-solar-film");
+  const closeFilm=document.getElementById("close-solar-film");
+  const filmVideo=document.getElementById("solar-film-video");
+  if(filmDialog && openFilm && filmVideo){
+    const source=filmDialog.dataset.solarFilmUrl;
+    const closeFilmDialog=()=>{if(filmDialog.open)filmDialog.close()};
+    openFilm.addEventListener("click",()=>{
+      if(typeof filmDialog.showModal!=="function")return;
+      if(!filmVideo.getAttribute("src")){
+        filmVideo.src=source;
+        filmVideo.load();
+      }
+      filmDialog.showModal();
+      closeFilm?.focus();
+      const attempt=filmVideo.play();
+      attempt?.catch?.(()=>{}); // The controls remain usable if playback is blocked.
+    });
+    closeFilm?.addEventListener("click",closeFilmDialog);
+    filmDialog.addEventListener("click",event=>{
+      // Native dialog backdrop: clicking the panel or controls does not close it.
+      if(event.target===filmDialog)closeFilmDialog();
+    });
+    filmDialog.addEventListener("close",()=>{
+      filmVideo.pause();
+      filmVideo.removeAttribute("src");
+      filmVideo.load();
+      openFilm.focus();
+    });
+  }
+
   const phaseButtons=[...document.querySelectorAll('.roofstudio-tab[role="tab"]')];
   if(phaseButtons.length){
     const stage=document.getElementById("roofstudio-phase");
