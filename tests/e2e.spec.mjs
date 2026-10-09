@@ -117,3 +117,25 @@ test("automated accessibility on distinct public page templates in both locales"
   }
   expect(errors).toEqual([]);
 });
+
+
+test("valid multistep lead is validated, serialized and confirms backend success",async({page})=>{
+  let payload=null;
+  await page.route("https://edalkjxbodxyyhsomnlt.supabase.co/functions/v1/submit-contact",async route=>{
+    payload=JSON.parse(route.request().postData()||"{}");
+    await route.fulfill({status:201,contentType:"application/json",headers:{"Access-Control-Allow-Origin":"*"},body:JSON.stringify({ok:true})});
+  });
+  await page.goto("/he/quote/");
+  await page.locator('input[name="full_name"]').fill("בדיקה אוטומטית");
+  await page.locator('input[name="email"]').fill("qa@example.com");
+  await page.locator("#next-step").click();
+  await page.locator('select[name="property_type"]').selectOption("operations");
+  await page.locator('textarea[name="message"]').fill("This is a browser test using a mocked API response");
+  await page.locator("#next-step").click();
+  await page.locator('input[name="consent"]').check();
+  await page.locator("#submit-lead").click();
+  await expect(page.locator("#form-feedback")).toContainText("הפנייה נשמרה בהצלחה");
+  expect(payload?.property_type).toBe("maintenance");
+  expect(payload?.consent).toBe(true);
+  expect(payload?.full_name).toBe("בדיקה אוטומטית");
+});
