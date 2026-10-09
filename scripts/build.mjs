@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { deflateSync } from "node:zlib";
 import { join } from "node:path";
 import { locales, photos, articleSpecs, guideSpecs } from "../src/data.mjs";
+import { articleCopy, guideCopy } from "../src/editorial.mjs";
 
 const out = "dist";
 const baseUrl = (process.env.SITE_URL || "https://artzi-energy.vercel.app").replace(/\/$/, "");
@@ -41,7 +42,7 @@ function scenarioCards(t){
  return '<div class="scenarios">'+t.services.map((s,i)=>'<div class="scenario">'+image(i+1,"")+'<div><span class="eyebrow">'+words(t.projectLabel)+' 0'+(i+1)+'</span><h3>'+words(s[1])+'</h3><p>'+words(s[3])+'</p></div></div>').join('')+'</div>';
 }
 function articles(t,locale,limit=articleSpecs.length){
- return '<div class="article-grid">'+articleSpecs.slice(0,limit).map((a,i)=>'<a href="'+url(locale,"insights/"+a[0])+'" class="article-card" data-topic="'+a[1]+'" data-search="'+words((a[locale==="he"?2:3]+" "+a[locale==="he"?4:5]).toLowerCase())+'"><div class="article-photo">'+image(i+1,"")+'</div><div class="article-body"><small class="eyebrow">'+words(t.categories[a[1]])+' / 0'+(i+1)+'</small><h3>'+words(a[locale==="he"?2:3])+'</h3><p>'+words(a[locale==="he"?4:5])+'</p><span class="read-more">'+words(t.read)+' ↗</span></div></a>').join('')+'</div>';
+ return '<div class="article-grid">'+articleSpecs.slice(0,limit).map((a,i)=>'<a href="'+url(locale,"insights/"+a[0])+'" class="article-card" data-topic="'+a[1]+'" data-search="'+words([a[locale==="he"?2:3],...a.slice(4).filter((_,j)=>j%2===(locale==="he"?0:1)),...(articleCopy[a[0]]?.[locale]||[])].join(" ").toLocaleLowerCase())+'"><div class="article-photo">'+image(i+1,"")+'</div><div class="article-body"><small class="eyebrow">'+words(t.categories[a[1]])+' / 0'+(i+1)+'</small><h3>'+words(a[locale==="he"?2:3])+'</h3><p>'+words(a[locale==="he"?4:5])+'</p><span class="read-more">'+words(t.read)+' ↗</span></div></a>').join('')+'</div>';
 }
 function guideList(t,locale){
  return '<div class="guide-list">'+guideSpecs.map((g,i)=>link(locale,"guides/"+g[0],'<small>0'+(i+1)+'</small><strong>'+words(g[locale==="he"?1:2])+'</strong><span aria-hidden="true">↗</span>')).join('')+'</div>';
@@ -63,6 +64,43 @@ function legal(t,locale,kind){
  [["General information","This is an informational preview, not engineering advice, a price quotation or output guarantee."],["Photography and scenarios","Photos and sample scenarios are illustrative and do not document completed company projects."],["Professional review","Installation and financial decisions need qualified assessment."]];
  return '<section class="section legal"><div class="container legal-inner">'+sections.map(s=>'<section><h2>'+words(s[0])+'</h2><p>'+words(s[1])+'</p></section>').join('')+'</div></section>';
 }
+
+function details(t,locale,a,i) {
+ const isHebrew=locale==="he",slug=a[0],title=a[isHebrew?2:3],sectionOffset=isHebrew?4:5,copy=articleCopy[slug]?.[locale];
+ if(!copy || copy.length!==3)throw new Error("Missing original editorial article: "+slug+"/"+locale);
+ const category=words(t.categories[a[1]]);
+ const count=copy.join(" ").split(/\\s+/).length;
+ const minutes=Math.max(1,Math.ceil(count/180));
+ const label=isHebrew?"דקות קריאה":"min read";
+ const tableLabel=isHebrew?"במאמר הזה":"In this article";
+ const shareLabel=isHebrew?"שיתוף המאמר":"Share article";
+ const relatedLabel=isHebrew?"מאמרים נוספים בנושא":"Related reading";
+ const homeLabel=isHebrew?"עמוד הבית":"Home";
+ const articleSections=copy.map((paragraph,n)=>'<section id="section-'+(n+1)+'" class="article-section"><h2>'+words(a[sectionOffset+n*2])+'</h2><p>'+words(paragraph)+'</p></section>').join("");
+ const sameCategory=articleSpecs.map((item,idx)=>({item,idx})).filter(x=>x.item[0]!==slug && x.item[1]===a[1]).slice(0,3);
+ const related=(sameCategory.length?sameCategory:articleSpecs.map((item,idx)=>({item,idx})).filter(x=>x.item[0]!==slug).slice(0,3)).map(({item,idx})=>'<a class="related-card" href="'+url(locale,"insights/"+item[0])+'">'+image(idx+1,"")+'<span>'+words(item[isHebrew?2:3])+' <b aria-hidden="true">↗</b></span></a>').join("");
+ const pos=articleSpecs.indexOf(a);
+ const near='<div class="article-neighbors">'+(pos>0?link(locale,"insights/"+articleSpecs[pos-1][0],(isHebrew?"הקודם":"Previous")+': '+words(articleSpecs[pos-1][isHebrew?2:3]),"neighbor"):'<span></span>')+(pos<articleSpecs.length-1?link(locale,"insights/"+articleSpecs[pos+1][0],(isHebrew?"הבא":"Next")+': '+words(articleSpecs[pos+1][isHebrew?2:3]),"neighbor"):'<span></span>')+'</div>';
+ return heroPage(t,title,t.articleLabel,a[sectionOffset],i+1,"FIELD NOTES / "+String(i+1).padStart(2,"0"))+
+ '<article class="section article-detail"><div class="container prose"><nav class="breadcrumbs" aria-label="'+(isHebrew?"פירורי לחם":"Breadcrumb")+'">'+link(locale,"",homeLabel)+'<span aria-hidden="true">/</span>'+link(locale,"insights",t.journalTitle.join(" "))+'<span aria-hidden="true">/</span><span aria-current="page">'+words(title)+'</span></nav>'+
+ '<div class="article-meta"><span>'+category+'</span><span aria-hidden="true">•</span><span>'+minutes+' '+label+'</span></div>'+
+ '<p class="lead">'+words(a[sectionOffset])+'</p>'+
+ '<nav class="article-toc" aria-label="'+tableLabel+'"><strong>'+tableLabel+'</strong><ol>'+copy.map((_,n)=>'<li><a href="#section-'+(n+1)+'">'+words(a[sectionOffset+n*2])+'</a></li>').join("")+'</ol></nav>'+
+ articleSections+'<p class="disclaimer">'+words(t.preview)+'</p>'+
+ '<div class="article-share"><button class="button dark share-article" type="button" data-share-title="'+words(title)+'">'+shareLabel+' ↗</button><p id="share-feedback" role="status" aria-live="polite"></p></div>'+near+
+ '<div class="related-articles"><h2>'+relatedLabel+'</h2><div class="related-grid">'+related+'</div></div>'+
+ btn(locale,"quote",t.contact,"dark")+'</div></article>';
+}
+function guideDetails(t,locale,a){
+ const isHebrew=locale==="he",name=a[isHebrew?1:2],sectionOffset=isHebrew?3:4,copy=guideCopy[a[0]]?.[locale];
+ if(!copy || copy.length!==3)throw new Error("Missing guide editorial: "+a[0]+"/"+locale);
+ const steps=copy.map((paragraph,n)=>'<article><strong>0'+(n+1)+'</strong><h2>'+words(a[sectionOffset+n*2])+'</h2><p>'+words(paragraph)+'</p></article>').join("");
+ return heroPage(t,name,t.guidesTitle[1],a[sectionOffset],2,"PRACTICAL GUIDE")+
+ '<section class="section"><div class="container">'+link(locale,"guides",(isHebrew?"← לכל המדריכים":"← All guides"),"back-link")+
+ '<div class="steps guide-steps">'+steps+'</div><p class="disclaimer">'+words(t.preview)+'</p>'+
+ btn(locale,"quote",t.contact,"dark")+'</div></section>';
+}
+
 function page(t,locale,slug){
  if(!slug)return '<section class="hero"><div class="hero-image">'+image(0,"",false)+'</div><div class="hero-overlay"></div><div class="hero-orbit"></div><div class="container hero-inner"><span class="eyebrow">ENGINEERED FOR A BRIGHTER TOMORROW</span><h1><span>'+words(t.hero[0])+'</span><em>'+words(t.hero[1])+'</em><span class="outline-text">'+words(t.hero[2])+'</span></h1><div class="hero-bottom"><p>'+words(t.heroDesc)+'</p><div class="actions">'+btn(locale,"contact",t.contact)+btn(locale,"solutions",t.discover,"glass")+'</div></div><span class="eyebrow">'+words(t.scroll)+' ↓</span></div></section><div class="marquee" aria-hidden="true"><div>'+Array(6).fill('<span>THINK ABOVE</span> ✳ <span>BRIGHTER FUTURE</span> ✳').join('')+'</div></div><section class="section vision"><div class="container split"><div class="vision-photo">'+image(1,"")+'<div class="vision-seal" aria-hidden="true">☼</div></div><div>'+heading(...t.vision,t.visionDesc,'00 / OUR PHILOSOPHY')+btn(locale,"about",t.discover,"dark")+'</div></div></section>'+cards(t,locale)+techList(t,locale)+solarLab(t,locale)+'<section class="section"><div class="container">'+heading(...t.journalTitle,t.journalDesc,'04 / FIELD NOTES')+articles(t,locale,3)+'<div class="center">'+btn(locale,"insights",t.journalTitle[0]+' '+t.journalTitle[1],"dark")+'</div></div></section>';
  if(slug==="about")return heroPage(t,...t.vision,t.visionDesc,1,"VISION / ARTZI")+techList(t,locale);
@@ -76,10 +114,10 @@ function page(t,locale,slug){
  if(slug==="calculator")return heroPage(t,...t.labTitle,t.labDesc,3,"ROOFTOP LAB")+solarLab(t,locale);
  if(slug==="compare")return heroPage(t,...t.compTitle,t.compDesc,4,"SOLUTIONS / COMPARE")+'<section class="section"><div class="container"><div class="compare-selects"><label>A<select id="compare-first">'+t.services.map((s,i)=>'<option value="'+i+'">'+words(s[1])+'</option>').join('')+'</select></label><label>B<select id="compare-second">'+t.services.map((s,i)=>'<option value="'+i+'" '+(i===1?'selected':'')+'>'+words(s[1])+'</option>').join('')+'</select></label></div><div class="compare-grid"><article id="compare-a"></article><article id="compare-b"></article></div></div></section>';
  if(slug==="faq")return heroPage(t,...t.faqTitle,t.faqDesc,2,"FAQ")+'<section class="section"><div class="container faq-list">'+t.faq.map((q,i)=>'<details><summary><small>0'+(i+1)+'</small><span>'+words(q[0])+'</span><b aria-hidden="true">+</b></summary><p>'+words(q[1])+'</p></details>').join('')+'</div></section>';
- if(slug==="insights")return heroPage(t,...t.journalTitle,t.journalDesc,1,"THE ENERGY JOURNAL")+'<section class="section"><div class="container"><div class="search-bar"><label>'+words(t.search)+'<input type="search" id="journal-search" placeholder="'+words(t.search)+'"></label><label>'+words(t.filter)+'<select id="journal-filter"><option value="all">'+words(t.all)+'</option>'+t.categories.map((c,i)=>'<option value="'+i+'">'+words(c)+'</option>').join('')+'</select></label></div><p id="journal-count" role="status"></p>'+articles(t,locale)+'<p id="journal-empty" hidden>'+words(t.noResults)+'</p><div class="center">'+btn(locale,"guides",t.guided,"dark")+'</div></div></section>';
- if(slug.startsWith("insights/")){const a=articleSpecs.find(s=>slug==="insights/"+s[0]),i=articleSpecs.indexOf(a),title=a[locale==="he"?2:3],start=locale==="he"?4:5;return heroPage(t,title,t.articleLabel,a[start],i+1,"FIELD NOTES / 0"+(i+1))+'<article class="section article-detail"><div class="container prose">'+link(locale,"insights",words(t.back),"back-link")+'<p class="lead">'+words(a[start])+'</p>'+[0,1,2].map(n=>'<section><h2>'+words(a[start+n*2])+'</h2><p>'+words(a[start+n*2])+'. '+(locale==="he"?'כדאי לאסוף נתוני אתר, לבדוק את הדרישות הרלוונטיות ולבחון פתרון מקצועי שמתאים למבנה ולפעילות בו.':'Collect real site data, confirm applicable requirements and review the solution with qualified professionals who understand the property.')+'</p></section>').join('')+'<p class="disclaimer">'+words(t.preview)+'</p>'+btn(locale,"quote",t.contact,"dark")+'</div></article>';}
+ if(slug==="insights")return heroPage(t,...t.journalTitle,t.journalDesc,1,"THE ENERGY JOURNAL")+'<section class="section"><div class="container"><div class="search-bar"><label>'+words(t.search)+'<input type="search" id="journal-search" placeholder="'+words(t.search)+'"></label><label>'+words(t.filter)+'<select id="journal-filter"><option value="all">'+words(t.all)+'</option>'+t.categories.map((c,i)=>'<option value="'+i+'">'+words(c)+'</option>').join('')+'</select></label></div><p id="journal-count" role="status"></p>'+articles(t,locale)+'<p id="journal-empty" hidden>'+words(t.noResults)+'</p><button type="button" class="button outline-dark" id="journal-reset" hidden>'+(locale==="he"?"ניקוי חיפוש וסינון":"Clear search and filters")+'</button>'<div class="center">'+btn(locale,"guides",t.guided,"dark")+'</div></div></section>';
+ if(slug.startsWith("insights/")){const a=articleSpecs.find(item=>slug==="insights/"+item[0]);if(!a)throw new Error("Unknown article "+slug);return details(t,locale,a,articleSpecs.indexOf(a));}
  if(slug==="guides")return heroPage(t,...t.guidesTitle,t.guidesDesc,2,"PRACTICAL GUIDES")+'<section class="section"><div class="container">'+guideList(t,locale)+'</div></section>';
- if(slug.startsWith("guides/")){const a=guideSpecs.find(s=>slug==="guides/"+s[0]),title=a[locale==="he"?1:2],start=locale==="he"?3:4;return heroPage(t,title,t.guidesTitle[1],a[start],2,"PRACTICAL GUIDE")+'<section class="section"><div class="container"><div class="steps">'+[0,1,2].map(n=>'<article><strong>0'+(n+1)+'</strong><h2>'+words(a[start+n*2])+'</h2><p>'+(locale==="he"?'נושא זה חשוב לאפיון נכון; יש לבחון אותו בהתאם לתנאי המבנה ולהנחיות בעלי מקצוע.':'This is an important step in planning and should be assessed against actual site conditions with qualified advice.')+'</p></article>').join('')+'</div>'+btn(locale,"quote",t.contact,"dark")+'</div></section>';}
+ if(slug.startsWith("guides/")){const a=guideSpecs.find(item=>slug==="guides/"+item[0]);if(!a)throw new Error("Unknown guide "+slug);return guideDetails(t,locale,a);}
  if(slug==="contact")return heroPage(t,...t.contactTitle,t.contactDesc,2,"LET'S CONNECT")+form(t,locale,false);
  if(slug==="quote")return heroPage(t,...t.quoteTitle,t.quoteDesc,3,"PROJECT DISCOVERY")+form(t,locale,true);
  if(slug==="privacy")return heroPage(t,...t.privacyTitle,t.disclosure,4,"DATA / PRIVACY")+legal(t,locale,"privacy");
