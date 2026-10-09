@@ -50,7 +50,9 @@ test("journal filtering and article navigation work",async({page})=>{
   await page.goto("/he/insights/");
   await expect(page.locator(".article-card")).toHaveCount(20);
   await page.locator("#journal-search").fill("ממירים");
-  await expect(page.locator(".article-card:visible")).toHaveCount(1);
+  const found=await page.locator(".article-card:visible").count();
+  expect(found).toBeGreaterThan(0);
+  expect(found).toBeLessThan(20);
   await page.locator(".article-card:visible").first().click();
   await expect(page.locator(".article-detail .prose")).toBeVisible();
 });
@@ -160,4 +162,111 @@ test("PWA manifest, icons and service worker register successfully",async({page,
     return navigator.serviceWorker.getRegistrations().then(r=>r.some(x=>x.active?.scriptURL.endsWith("/sw.js")));
   });
   expect(registered).toBeTruthy();
+});
+
+
+test("journal search checks full articles and synchronizes a shareable URL",async({page})=>{
+ await page.goto("/he/insights/");
+ await expect(page.locator(".article-card")).toHaveCount(20);
+ await page.locator("#journal-search").fill("שלד");
+ const shown=await page.locator(".article-card:visible").count();
+ expect(shown).toBeGreaterThan(0);
+ expect(shown).toBeLessThan(20);
+ expect(new URL(page.url()).searchParams.get("q")).toBe("שלד");
+ await page.reload();
+ await expect(page.locator("#journal-search")).toHaveValue("שלד");
+ await expect(page.locator(".article-card:visible")).toHaveCount(shown);
+});
+test("journal categories, empty state, reset and browser back filter persistence",async({page})=>{
+ await page.goto("/en/insights/");
+ await page.locator("#journal-filter").selectOption("1");
+ const filtered=await page.locator(".article-card:visible").count();
+ expect(filtered).toBeGreaterThan(0);
+ expect(filtered).toBeLessThan(20);
+ expect(new URL(page.url()).searchParams.get("topic")).toBe("1");
+ await page.locator("#journal-search").fill("UNFINDABLEMAGAZINE12345");
+ await expect(page.locator("#journal-empty")).toBeVisible();
+ await expect(page.locator(".article-card:visible")).toHaveCount(0);
+ await page.locator("#journal-reset").click();
+ await expect(page.locator(".article-card:visible")).toHaveCount(20);
+ await expect(page.locator("#journal-reset")).toBeHidden();
+ expect(new URL(page.url()).searchParams.has("topic")).toBe(false);
+ await page.locator("#journal-search").fill("inverter");
+ await page.locator(".article-card:visible").first().click();
+ await page.locator(".breadcrumbs a[href*='/insights/']").click();
+ await expect(page.locator("#journal-search")).toHaveValue("inverter");
+});
+test("all articles have unique titles, original content, working TOC and related recommendations",async({page})=>{
+ const headings=[];
+ for(const locale of ["he","en"]){
+  for(const slug of ["roof-readiness","module-choice","inverters","future-of-solar"]){
+   await page.goto("/"+locale+"/insights/"+slug+"/");
+   const title=await page.title();
+   expect(title).not.toContain("ARTZI | insights");
+   headings.push(locale+title);
+   await expect(page.locator(".article-section")).toHaveCount(3);
+   await expect(page.locator(".article-toc a")).toHaveCount(3);
+   await expect(page.locator(".related-card")).toHaveCount(3);
+   const first=await page.locator(".article-section p").first().textContent();
+   expect(first.length).toBeGreaterThan(100);
+   await page.locator('.article-toc a[href="#section-2"]').click();
+   expect(new URL(page.url()).hash).toBe("#section-2");
+   await expect(page.locator(".article-share .share-article")).toBeVisible();
+  }
+ }
+ expect(new Set(headings).size).toBe(headings.length);
+});
+test("article share action generates feedback and all bilingual practical guide steps have original body",async({page})=>{
+ await page.goto("/he/insights/roof-readiness/");
+ await page.locator(".share-article").click();
+ await expect(page.locator("#share-feedback")).not.toBeEmpty();
+ for(const locale of ["he","en"]){
+  await page.goto("/"+locale+"/guides/start/");
+  await expect(page.locator(".guide-steps article")).toHaveCount(3);
+  for(let n=0;n<3;n++)expect((await page.locator(".guide-steps article p").nth(n).textContent()).length).toBeGreaterThan(35);
+ }
+});
+
+
+test("premium home showcases cinematic hero, editorial story and solar studio in both languages",async({page})=>{
+ for(const locale of ["he","en"]){
+  await page.goto("/"+locale+"/");
+  await expect(page.locator("section.cinematic-home h1")).toBeVisible();
+  await expect(page.locator(".studio-intro h2")).toBeVisible();
+  await expect(page.locator(".solar-story h2")).toBeVisible();
+  await expect(page.locator(".rooftop-studio h2")).toBeVisible();
+  await expect(page.locator(".journal-feature h2")).toBeVisible();
+  await expect(page.locator(".studio-value")).toHaveCount(3);
+  await expect(page.locator(".roofstudio-tab")).toHaveCount(4);
+  await expect(page.locator(".journal-small .article-card")).toHaveCount(3);
+  expect(await page.locator(".header-cta").getAttribute("href")).toBe("/"+locale+"/quote/");
+ }
+});
+test("solar atelier phase controls update content and support keyboard navigation",async({page})=>{
+ await page.goto("/he/");
+ const tabs=page.locator('.roofstudio-tab[role="tab"]');
+ await expect(page.locator("#roofstudio-phase")).toHaveText("01 / 04");
+ const before=await page.locator("#phase-description").textContent();
+ await tabs.nth(2).click();
+ await expect(page.locator("#roofstudio-phase")).toHaveText("03 / 04");
+ await expect(tabs.nth(2)).toHaveAttribute("aria-selected","true");
+ expect(await page.locator("#phase-description").textContent()).not.toBe(before);
+ await tabs.nth(2).focus();
+ await page.keyboard.press("ArrowRight");
+ await expect(page.locator("#roofstudio-phase")).toHaveText("04 / 04");
+ await expect(tabs.nth(3)).toBeFocused();
+ await page.keyboard.press("Home");
+ await expect(page.locator("#roofstudio-phase")).toHaveText("01 / 04");
+});
+test("solar atelier has no document overflow on typical phone widths and accessible home landmarks",async({page})=>{
+ for(const width of [320,375,390,430,768,1024,1440]){
+  await page.setViewportSize({width,height:844});
+  for(const locale of ["he","en"]){
+   await page.goto("/"+locale+"/");
+   const bounds=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
+   expect(bounds.doc,"Home overflow "+width+" "+locale).toBeLessThanOrEqual(bounds.viewport+2);
+   await expect(page.locator("main")).toHaveCount(1);
+   await expect(page.locator("h1")).toHaveCount(1);
+  }
+ }
 });
