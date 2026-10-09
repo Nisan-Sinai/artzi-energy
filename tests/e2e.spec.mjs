@@ -285,11 +285,11 @@ test("cinematic solar video opens in a real accessible player only after click",
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAttribute("open","");
   await expect(player).toHaveAttribute("controls","");
-  expect(await player.getAttribute("src")).toMatch(/^https:\/\/videos\.pexels\.com\/video-files\/\d+\/.+\.mp4$/);
+  expect(await player.getAttribute("src")).toContain("commons.wikimedia.org/wiki/Special:Redirect/file/");
   await expect(page.locator("#close-solar-film")).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
-  expect(await player.getAttribute("src")).toBeNull();
+  await expect.poll(()=>player.getAttribute("src")).toBeNull();
   await expect(preview).toBeFocused();
   await preview.click();
   await expect(dialog).toBeVisible();
@@ -309,7 +309,7 @@ test("solar film section stays responsive and uses a stock-footage disclosure",a
 
 
 test("solar showcase footage host responds with video instead of a broken URL",async({request})=>{
- const url="https://videos.pexels.com/video-files/2249554/2249554-hd_1920_1080_25fps.mp4";
+ const url="https://commons.wikimedia.org/wiki/Special:Redirect/file/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
  const response=await request.head(url,{timeout:30000});
  expect(response.status(),"Solar media unavailable: "+url).toBeLessThan(400);
  const type=response.headers()["content-type"]||"";
