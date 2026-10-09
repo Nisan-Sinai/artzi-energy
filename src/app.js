@@ -51,21 +51,70 @@
     const cards=[...document.querySelectorAll(".article-card")];
     const count=document.getElementById("journal-count");
     const empty=document.getElementById("journal-empty");
-    const update=()=>{
-      const term=search.value.trim().toLocaleLowerCase();
+    const reset=document.getElementById("journal-reset");
+    const key="artzi-journal-"+lang;
+    const normalize=value=>String(value||"").normalize("NFKC").trim().toLocaleLowerCase();
+    const params=new URLSearchParams(window.location.search);
+    let saved=null;
+    try{saved=JSON.parse(sessionStorage.getItem(key)||"null")}catch{}
+    search.value=params.has("q")?params.get("q"):(saved?.q||"");
+    const requestedTopic=params.has("topic")?params.get("topic"):(saved?.topic||"all");
+    category.value=[...category.options].some(x=>x.value===requestedTopic)?requestedTopic:"all";
+    const update=(sync=true)=>{
+      const term=normalize(search.value);
       let visible=0;
       for(const card of cards){
-        const matches=(!term||card.dataset.search.includes(term)) && (category.value==="all"||card.dataset.topic===category.value);
+        const matches=(!term||normalize(card.dataset.search).includes(term)) && (category.value==="all"||card.dataset.topic===category.value);
         card.hidden=!matches;
         if(matches)visible++;
       }
-      count.textContent=visible+" "+(lang==="he"?"מאמרים":"articles");
+      count.textContent=(lang==="he"?"מוצגים ":"Showing ")+visible+(lang==="he"?" מתוך ":" of ")+cards.length+(lang==="he"?" מאמרים":" articles");
       empty.hidden=visible!==0;
+      if(reset)reset.hidden=!term&&category.value==="all";
+      if(sync){
+        const updated=new URL(window.location.href);
+        if(term)updated.searchParams.set("q",search.value.trim());else updated.searchParams.delete("q");
+        if(category.value!=="all")updated.searchParams.set("topic",category.value);else updated.searchParams.delete("topic");
+        history.replaceState(null,"",updated.pathname+updated.search+updated.hash);
+      }
+      try{sessionStorage.setItem(key,JSON.stringify({q:search.value.trim(),topic:category.value}))}catch{}
     };
-    search.addEventListener("input",update);
-    category.addEventListener("change",update);
-    update();
+    search.addEventListener("input",()=>update());
+    category.addEventListener("change",()=>update());
+    reset?.addEventListener("click",()=>{search.value="";category.value="all";update();search.focus()});
+    update(false);
   }
+  if(window.location.pathname.includes("/insights/") && !search){
+    try{
+      const saved=JSON.parse(sessionStorage.getItem("artzi-journal-"+lang)||"null");
+      const back=document.querySelector('.breadcrumbs a[href$="/insights/"]');
+      if(back && saved && (saved.q||saved.topic!=="all")){
+        const next=new URL(back.href);
+        if(saved.q)next.searchParams.set("q",saved.q);
+        if(saved.topic!=="all")next.searchParams.set("topic",saved.topic);
+        back.href=next.pathname+next.search;
+      }
+    }catch{}
+  }
+  document.querySelectorAll(".share-article").forEach(button=>button.addEventListener("click",async()=>{
+    const title=button.dataset.shareTitle||document.title;
+    const feedback=document.getElementById("share-feedback");
+    const payload={title,url:window.location.href};
+    try{
+      if(navigator.share)await navigator.share(payload);
+      else if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(window.location.href);
+      else throw Error("clipboard unavailable");
+      if(feedback)feedback.textContent=lang==="he"?"הקישור שותף או הועתק.":"Link shared or copied.";
+    }catch(error){
+      if(error.name==="AbortError")return;
+      const message=encodeURIComponent(title+"\n"+window.location.href);
+      const link=document.createElement("a");
+      link.href="https://wa.me/?text="+message;
+      link.target="_blank";link.rel="noopener noreferrer";
+      link.textContent=lang==="he"?"שיתוף בוואטסאפ ↗":"Share via WhatsApp ↗";
+      feedback?.replaceChildren(link);
+    }
+  }));
   const galleryButtons=[...document.querySelectorAll("#gallery-filters button")];
   for(const button of galleryButtons){
     button.addEventListener("click",()=>{
