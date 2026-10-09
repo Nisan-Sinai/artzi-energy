@@ -233,3 +233,11 @@ html[dir=rtl] .hero-overlay{background:linear-gradient(0deg,#061a13d0,transparen
 .article-body .eyebrow{color:#34573a}
 .article-body p{color:#3f5b48}
 .floating-whatsapp{background:#0c7339;color:#fff}
+
+/* Readability and accessibility audit: stronger contrast throughout editorial templates. */
+.steps p,.faq-list details p,.compare-grid article p,.legal-inner p,.prose p,.article-body p,.section-heading>p,.scenario p{color:#3e5845}
+.steps p{color:#3e5845}
+.scenario p{color:#fff}
+.guide-list small{color:#315a3c}
+.page-copy p{color:#fff}
+.foot-grid nav a,.foot-grid p,.foot-last{color:#c8d7cb}
