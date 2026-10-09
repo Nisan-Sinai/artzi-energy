@@ -107,11 +107,13 @@ test("all page images on primary homepages load, and no JavaScript errors are th
 });
 test("automated accessibility on distinct public page templates in both locales",async({page})=>{
   const templates=["about","solutions","projects","gallery","technology","process","calculator","compare","faq","insights","guides","contact","quote","privacy","accessibility","terms","solutions/residential","technology/modules","insights/roof-readiness","guides/start"];
+  const errors=[];
   for(const locale of ["he","en"]){
     for(const route of templates){
       await page.goto("/"+locale+"/"+route+"/",{waitUntil:"domcontentloaded"});
       const results=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
-      expect(results.violations.map(v=>v.id+": "+v.nodes.map(n=>n.target.join(" ")).join("; ")),locale+"/"+route).toEqual([]);
+      for(const v of results.violations)errors.push(locale+"/"+route+" — "+v.id+": "+v.nodes.map(n=>n.target.join(" ")).join("; "));
     }
   }
+  expect(errors).toEqual([]);
 });
