@@ -9,7 +9,14 @@ const esc = value => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&
 const url = (locale, path = "") => "/" + locale + "/" + (path ? path + "/" : "");
 const link = (locale, path, label, cls = "") => '<a href="' + url(locale,path) + '" class="' + cls + '">' + label + '</a>';
 const btn = (locale, path, label, style = "lime") => link(locale,path,'<span>'+esc(label)+'</span><span aria-hidden="true">↗</span>',"button "+style);
-const image = (index, alt = "", lazy = true) => '<img src="'+photos[index % photos.length]+'" alt="'+esc(alt)+'" '+(lazy?'loading="lazy"':'fetchpriority="high"')+' decoding="async">';
+const image = (index, alt = "", lazy = true) => {
+ const source=photos[index % photos.length];
+ const size=w=>source.replace(/([?&])w=\d+/, "$1w="+w);
+ const widths=[480,850,1280,1800];
+ const srcset=widths.map(w=>size(w)+" "+w+"w").join(", ");
+ const sizes=lazy?"(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw":"100vw";
+ return '<img src="'+source+'" srcset="'+srcset+'" sizes="'+sizes+'" alt="'+esc(alt)+'" '+(lazy?'loading="lazy"':'fetchpriority="high"')+' decoding="async">';
+};
 const wa = (t, message) => "https://wa.me/972556640524?text=" + encodeURIComponent(message || t.waText);
 const words = x => esc(x);
 function heading(a,b,description,marker="ARTZI / ENERGY"){
@@ -95,7 +102,7 @@ function chrome(locale,route,t,body){
  const name=route?"ARTZI | "+route.replaceAll("/"," / "):t.brand;
  const completeTitle=words(name),desc=words(route.startsWith("insights")?t.journalDesc:t.heroDesc);
  const canonical=baseUrl+url(locale,route);
- return '<!doctype html><html lang="'+locale+'" dir="'+t.dir+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#071c16"><meta name="description" content="'+desc+'"><meta name="robots" content="noindex,nofollow"><meta property="og:type" content="website"><meta property="og:title" content="'+completeTitle+'"><meta property="og:description" content="'+desc+'"><meta property="og:image" content="'+photos[0]+'"><link rel="canonical" href="'+canonical+'"><link rel="alternate" hreflang="he-IL" href="'+baseUrl+url("he",route)+'"><link rel="alternate" hreflang="en" href="'+baseUrl+url("en",route)+'"><link rel="alternate" hreflang="x-default" href="'+baseUrl+url("he",route)+'"><link rel="preconnect" href="https://images.unsplash.com"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/styles.css"><title>'+completeTitle+'</title></head><body><a href="#main" class="skip">'+words(t.skip)+'</a><div class="progress" id="progress"></div>'+nav+'<main id="main">'+body+'</main>'+footer+'<a class="floating-whatsapp" href="'+wa(t)+'" target="_blank" rel="noopener noreferrer" aria-label="'+words(t.whatsapp)+'">WA</a><script src="/app.js" defer></script></body></html>';
+ return '<!doctype html><html lang="'+locale+'" dir="'+t.dir+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#071c16"><meta name="description" content="'+desc+'"><meta name="robots" content="noindex,nofollow"><meta property="og:type" content="website"><meta property="og:title" content="'+completeTitle+'"><meta property="og:description" content="'+desc+'"><meta property="og:image" content="'+photos[0]+'"><link rel="canonical" href="'+canonical+'"><link rel="alternate" hreflang="he-IL" href="'+baseUrl+url("he",route)+'"><link rel="alternate" hreflang="en" href="'+baseUrl+url("en",route)+'"><link rel="alternate" hreflang="x-default" href="'+baseUrl+url("he",route)+'"><link rel="preconnect" href="https://images.unsplash.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/styles.css"><title>'+completeTitle+'</title></head><body><a href="#main" class="skip">'+words(t.skip)+'</a><div class="progress" id="progress"></div>'+nav+'<main id="main">'+body+'</main>'+footer+'<a class="floating-whatsapp" href="'+wa(t)+'" target="_blank" rel="noopener noreferrer" aria-label="'+words(t.whatsapp)+'">WA</a><script src="/app.js" defer></script></body></html>';
 }
 function crc32(buffer){
  let crc = 0xffffffff;
