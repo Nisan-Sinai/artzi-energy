@@ -162,7 +162,7 @@
         const response=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
           full_name:String(fields.get("full_name")||"").trim(),email:String(fields.get("email")||"").trim(),
           phone:String(fields.get("phone")||"").trim(),
-          property_type:String(fields.get("property_type")||"residential"),
+          property_type:String(fields.get("property_type")||"residential")==="operations"?"maintenance":String(fields.get("property_type")||"residential"),
           message:String(fields.get("message")||""),locale:lang,consent:true,
           website:String(fields.get("website")||"")
         })});
