@@ -241,3 +241,5 @@ html[dir=rtl] .hero-overlay{background:linear-gradient(0deg,#061a13d0,transparen
 .guide-list small{color:#315a3c}
 .page-copy p{color:#fff}
 .foot-grid nav a,.foot-grid p,.foot-last{color:#c8d7cb}
+
+.faq-list summary small{color:#365b3f}
