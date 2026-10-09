@@ -479,14 +479,25 @@ html[dir=rtl] .solar-story-shade{background:linear-gradient(0deg,#041910e8,#0419
 .film-dialog:not([open]){display:none}
 .film-dialog::backdrop{background:#020b07e9;backdrop-filter:blur(14px)}
 .film-dialog-inner{position:relative;background:#081b14;border-radius:12px;overflow:visible;box-shadow:0 35px 110px #0009;padding:9px 9px 0}
-.film-dialog video{display:block;width:100%;max-height:80dvh;aspect-ratio:16/9;object-fit:contain;border-radius:6px;background:#07150d}
+.film-canvas-shell{width:100%;background:#061911;border-radius:6px;overflow:hidden;line-height:0}
+.film-dialog canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:6px;background:#061911}
+.film-control-bar{padding:12px 14px 5px}
+.film-progress{height:4px;border-radius:8px;overflow:hidden;background:#395947}
+.film-progress span{display:block;width:0;height:100%;background:#dafa73;transition:width .1s linear}
+.film-actions{display:flex;align-items:center;gap:13px;padding:13px 0 4px}
+.film-actions button{padding:10px 14px;border:1px solid #63886b;border-radius:6px;color:#f5ffe9;background:#123525;font-size:13px;font-weight:800;cursor:pointer}
+.film-actions button:hover,.film-actions button:focus-visible{background:#285335;border-color:#dafa73}
+.film-actions #solar-film-time{margin-inline-start:auto;font:700 12px "Space Grotesk",sans-serif;color:#c7dfbb;white-space:nowrap}
+.film-dialog-footer{border-top:1px solid #315342}
+.film-dialog-footer span:first-child{font-weight:800;color:#dafa73}
+@media(max-width:600px){.film-dialog canvas{max-height:60dvh}.film-control-bar{padding:9px 7px 2px}.film-actions{gap:7px}.film-actions button{font-size:11px;padding:8px}.film-dialog-footer{gap:7px}}
 .film-close{position:absolute;top:-17px;inset-inline-end:-13px;border:1px solid #a2bba2;background:#dafa73;color:#0c2b19;border-radius:50%;width:43px;height:43px;font-size:19px;font-weight:900;display:grid;place-items:center;z-index:2;cursor:pointer;box-shadow:0 7px 20px #0005}
 .film-close:hover{background:white}
 .film-dialog-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 12px;color:#d2dfcb;font-size:12px;line-height:1.8}
 .film-dialog-footer a{color:#dafa73;text-decoration:underline;text-underline-offset:3px}
 @keyframes solarFilmSweep{0%{transform:translateX(-120%)}42%,100%{transform:translateX(120%)}}
 @media(max-width:980px){.film-layout{grid-template-columns:1fr}.film-copy h2{font-size:clamp(56px,10vw,95px)}.film-preview{min-height:410px}.film-points{max-width:720px}.film-disclaimer{margin-top:18px}}
-@media(max-width:600px){.film-section{padding-block:76px}.film-copy h2{font-size:clamp(48px,12vw,68px);margin-block:20px}.film-copy>p{font-size:15px}.film-index{margin-top:25px}.film-points>div{padding:14px 0}.film-preview{min-height:285px;aspect-ratio:1.2;box-shadow:12px 13px 0 #d5e0ce}.film-preview:hover{box-shadow:12px 17px 0 #cfddc6}.film-topline{top:18px;inset-inline:17px;font-size:9px}.film-preview-bottom{inset-inline:18px;bottom:22px}.film-tagline{font-size:clamp(38px,9.2vw,58px)}.film-play{width:61px;height:61px;flex-basis:61px;box-shadow:0 0 0 7px #dafc731a}.film-caption{font-size:10px;align-items:start;flex-direction:column}.film-dialog{width:calc(100vw - 20px)}.film-dialog-footer{align-items:start;flex-direction:column;font-size:11px}.film-close{inset-inline-end:-5px}.film-dialog video{max-height:75dvh}}
+@media(max-width:600px){.film-section{padding-block:76px}.film-copy h2{font-size:clamp(48px,12vw,68px);margin-block:20px}.film-copy>p{font-size:15px}.film-index{margin-top:25px}.film-points>div{padding:14px 0}.film-preview{min-height:285px;aspect-ratio:1.2;box-shadow:12px 13px 0 #d5e0ce}.film-preview:hover{box-shadow:12px 17px 0 #cfddc6}.film-topline{top:18px;inset-inline:17px;font-size:9px}.film-preview-bottom{inset-inline:18px;bottom:22px}.film-tagline{font-size:clamp(38px,9.2vw,58px)}.film-play{width:61px;height:61px;flex-basis:61px;box-shadow:0 0 0 7px #dafc731a}.film-caption{font-size:10px;align-items:start;flex-direction:column}.film-dialog{width:calc(100vw - 20px)}.film-dialog-footer{align-items:start;flex-direction:column;font-size:11px}.film-close{inset-inline-end:-5px}.film-dialog canvas{max-height:60dvh}}
 @media(prefers-reduced-motion:reduce){.film-sweep{animation:none}.film-poster img,.film-preview,.film-play{transition:none}}
 
 /* Dark-on-light contrast fix for small film step numbers. */
