@@ -132,8 +132,8 @@ function journalFeature(t,locale){
 }
 
 
-const solarFilmUrl="https://videos.pexels.com/video-files/2249554/2249554-hd_1920_1080_25fps.mp4";
-const solarFilmSource="https://www.pexels.com/video/solar-panels-on-rooftop-2249554/";
+const solarFilmUrl="https://commons.wikimedia.org/wiki/Special:Redirect/file/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
+const solarFilmSource="https://commons.wikimedia.org/wiki/File:20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
 function solarFilm(t,locale){
  const he=locale==="he";
  const playLabel=he?"נגן סרטון אנרגיה סולארית":"Play solar energy film";
@@ -141,7 +141,7 @@ function solarFilm(t,locale){
  const title=he?"אנרגיה שלא רק רואים.":"Energy you can see.";
  const accent=he?"מרגישים.":"Feel it.";
  const subtitle=he?"כמה שניות של השראה — גגות, אור וחשיבה חדשה.":"A visual story of rooftops, light and a brighter perspective.";
- const note=he?"צילום מאגר להמחשה בלבד • אינו פרויקט של ארצי אנרגיה":"Illustrative stock footage • Not an Artzi Energy project";
+ const note=he?"צילום USDA להמחשה בלבד • אינו פרויקט של ארצי אנרגיה":"USDA footage for illustration • Not an Artzi Energy project";
  const fallback=he?"הסרטון לא נפתח? לצפייה במקור":"Video unavailable? Open the source";
  return '<section class="section film-section" aria-labelledby="film-title"><div class="container film-layout">'+
  '<div class="film-copy"><span class="eyebrow">ARTZI / MOTION STORY — 006</span><h2 id="film-title">'+title+'<br><em>'+accent+'</em></h2><p>'+words(subtitle)+'</p>'+
