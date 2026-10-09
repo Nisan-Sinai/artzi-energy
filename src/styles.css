@@ -488,3 +488,6 @@ html[dir=rtl] .solar-story-shade{background:linear-gradient(0deg,#041910e8,#0419
 @media(max-width:980px){.film-layout{grid-template-columns:1fr}.film-copy h2{font-size:clamp(56px,10vw,95px)}.film-preview{min-height:410px}.film-points{max-width:720px}.film-disclaimer{margin-top:18px}}
 @media(max-width:600px){.film-section{padding-block:76px}.film-copy h2{font-size:clamp(48px,12vw,68px);margin-block:20px}.film-copy>p{font-size:15px}.film-index{margin-top:25px}.film-points>div{padding:14px 0}.film-preview{min-height:285px;aspect-ratio:1.2;box-shadow:12px 13px 0 #d5e0ce}.film-preview:hover{box-shadow:12px 17px 0 #cfddc6}.film-topline{top:18px;inset-inline:17px;font-size:9px}.film-preview-bottom{inset-inline:18px;bottom:22px}.film-tagline{font-size:clamp(38px,9.2vw,58px)}.film-play{width:61px;height:61px;flex-basis:61px;box-shadow:0 0 0 7px #dafc731a}.film-caption{font-size:10px;align-items:start;flex-direction:column}.film-dialog{width:calc(100vw - 20px)}.film-dialog-footer{align-items:start;flex-direction:column;font-size:11px}.film-close{inset-inline-end:-5px}.film-dialog video{max-height:75dvh}}
 @media(prefers-reduced-motion:reduce){.film-sweep{animation:none}.film-poster img,.film-preview,.film-play{transition:none}}
+
+/* Dark-on-light contrast fix for small film step numbers. */
+.film-number{color:#235232}
