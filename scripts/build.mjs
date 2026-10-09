@@ -134,32 +134,40 @@ function journalFeature(t,locale){
 
 function solarFilm(t,locale){
  const he=locale==="he";
- const playLabel=he?"נגן סרטון אנרגיה סולארית":"Play solar energy film";
- const closeLabel=he?"סגירת הסרטון":"Close video";
- const title=he?"אנרגיה שלא רק רואים.":"Energy you can see.";
- const accent=he?"מרגישים.":"Feel it.";
- const subtitle=he?"כמה שניות של השראה — גגות, אור וחשיבה חדשה.":"A visual story of rooftops, light and a brighter perspective.";
- const note=he?"אנימציה מקורית להמחשה • אינה תיעוד של פרויקט שביצעה החברה":"Original motion illustration • Not footage of a completed project";
- const replayLabel=he?"ניגון מחדש":"Replay";
- const pauseLabel=he?"השהיה":"Pause";
- const filmAccessible=he?"אנימציה סולארית המדגימה מעבר מאור שמש למערכת פאנלים ולבית מחובר":"Solar motion illustration showing sunlight, panels and a connected home";
- return '<section class="section film-section" aria-labelledby="film-title"><div class="container film-layout">'+
- '<div class="film-copy"><span class="eyebrow">ARTZI / MOTION STORY — 006</span><h2 id="film-title">'+title+'<br><em>'+accent+'</em></h2><p>'+words(subtitle)+'</p>'+
- '<div class="film-index"><span>01 <span aria-hidden="true">/</span> 03</span><span>INSPIRED BY LIGHT</span></div>'+
- '<div class="film-points"><div><span class="film-number">01</span><span>'+(he?"מתחילים במבט אחר על הגג":"See the roof differently")+'</span></div><div><span class="film-number">02</span><span>'+(he?"מחברים אור, נתונים ותכנון":"Connect sunlight with smart planning")+'</span></div><div><span class="film-number">03</span><span>'+(he?"מכוונים לעתיד ארוך טווח":"Design for the long term")+'</span></div></div>'+
- '<small class="film-disclaimer">'+note+'</small></div>'+
- '<div class="film-showcase"><button type="button" class="film-preview" id="open-solar-film" aria-label="'+playLabel+'" aria-haspopup="dialog" aria-controls="solar-film-dialog">'+
- '<span class="film-poster">'+image(5,he?"מערכת פאנלים סולאריים להמחשה":"Illustrative solar panels",true)+'</span>'+
- '<span class="film-preview-overlay" aria-hidden="true"></span><span class="film-sweep" aria-hidden="true"></span><span class="film-crosshair film-crosshair-a" aria-hidden="true">+</span><span class="film-crosshair film-crosshair-b" aria-hidden="true">+</span>'+
- '<span class="film-topline" aria-hidden="true"><span>ARTZI ENERGY</span><span>PLAY / FILM 01</span></span>'+
- '<span class="film-preview-bottom"><span class="film-tagline">SOLAR<br><em>REIMAGINED.</em></span><span class="film-play" aria-hidden="true"><svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></span>'+
- '</button><div class="film-caption"><span>'+note+'</span><span>WATCH THE FILM <span aria-hidden="true">↗</span></span></div></div>'+
- '</div></section>'+
- '<dialog class="film-dialog" id="solar-film-dialog" aria-label="'+playLabel+'">'+
- '<div class="film-dialog-inner"><button type="button" class="film-close" aria-label="'+closeLabel+'" id="close-solar-film">✕</button>'+
- '<div class="film-canvas-shell"><canvas width="960" height="540" id="solar-film-canvas" role="img" aria-label="'+filmAccessible+'">'+filmAccessible+'</canvas></div>'+
- '<div class="film-control-bar"><div class="film-progress" aria-hidden="true"><span id="solar-film-progress"></span></div><div class="film-actions"><button type="button" id="solar-film-toggle" aria-pressed="false">'+pauseLabel+' ❚❚</button><button type="button" id="solar-film-replay">'+replayLabel+' ↻</button><span id="solar-film-time" aria-hidden="true">00:00 / 00:12</span></div></div>'+
- '<div class="film-dialog-footer"><span id="solar-film-scene">'+(he?"האור מתחיל כאן":"It starts with sunlight")+'</span><span>'+note+'</span></div></div></dialog>';
+ const labels=he?{
+  heading:"צפו באנרגיה",accent:"בפעולה.",sub:"שני סרטוני רחפן אמיתיים מהעולם הסולארי — לחצו על PLAY וצאו לסיור חזותי קצר.",
+  chip:"2 סרטונים לצפייה",cta:"לחצו לצפייה בסרטון",close:"סגירת הסרטון",
+  note:"צילומי מאגר להמחשה בלבד • אינם פרויקטים שביצעה ארצי אנרגיה",
+  direct:"צפייה בצילום המקורי ב־Pexels",error:"לא הצלחנו לטעון את הסרטון. אפשר לנסות שוב או לצפות במקור.",
+  one:"גגות סולאריים מהאוויר",two:"מבט על העיר הסולארית",durationOne:"11 שניות",durationTwo:"12 שניות"
+ }:{
+  heading:"WATCH SOLAR",accent:"COME ALIVE.",sub:"Two real cinematic drone clips showcasing solar rooftops. Tap PLAY for the full experience.",
+  chip:"2 REAL VIDEOS",cta:"PLAY THE VIDEO",close:"Close video",
+  note:"Licensed stock footage for illustration • These are not Artzi Energy installations",
+  direct:"View the original Pexels footage",error:"The clip did not load. Try again or view the original.",
+  one:"Rooftop solar from above",two:"The urban solar landscape",durationOne:"11 seconds",durationTwo:"12 seconds"
+ };
+ const sources=[
+  {id:"open-solar-film",src:"/media/solar-rooftop.mp4",page:"https://www.pexels.com/video/aerial-footage-of-solar-panels-on-a-rooftop-9790190/",title:labels.one,duration:labels.durationOne,photo:5,credit:"Kindel Media"},
+  {id:"open-solar-film-city",src:"/media/solar-city.mp4",page:"https://www.pexels.com/video/aerial-view-of-rooftop-solar-panels-29543191/",title:labels.two,duration:labels.durationTwo,photo:2,credit:"TR Studio"}
+ ];
+ const cards=sources.map((clip,index)=>
+  '<div class="film-card"><button type="button" class="film-preview" id="'+clip.id+'" aria-label="'+words(labels.cta+": "+clip.title)+'" aria-haspopup="dialog" aria-controls="solar-film-dialog" data-film-src="'+clip.src+'" data-film-title="'+words(clip.title)+'" data-film-page="'+clip.page+'" data-film-credit="'+clip.credit+'">'+
+  '<span class="film-poster">'+image(clip.photo,clip.title,true)+'</span><span class="film-preview-overlay" aria-hidden="true"></span>'+
+  '<span class="film-sweep" aria-hidden="true"></span><span class="film-topline" aria-hidden="true"><span>ARTZI ENERGY / FILM 0'+(index+1)+'</span><span>● VIDEO</span></span>'+
+  '<span class="film-hero-play" aria-hidden="true"><svg width="35" height="35" viewBox="0 0 24 24" fill="currentColor"><path d="M8 4v16l12-8z"/></svg></span>'+
+  '<span class="film-preview-bottom"><span class="film-tagline">'+words(clip.title)+'</span><span class="film-play-cta"><span aria-hidden="true">▶</span> '+words(labels.cta)+'</span></span>'+
+  '</button><div class="film-caption"><span>'+clip.credit+' / PEXELS · '+words(clip.duration)+'</span><span class="film-caption-cta">VIDEO 0'+(index+1)+' ↗</span></div></div>'
+ ).join("");
+ return '<section class="section film-section" id="solar-films" aria-labelledby="film-title"><div class="container">'+
+  '<div class="film-heading"><div><span class="eyebrow">ARTZI / CINEMATIC SOLAR FILMS</span><h2 id="film-title">'+words(labels.heading)+' <em>'+words(labels.accent)+'</em></h2><p>'+words(labels.sub)+'</p></div><span class="film-count-chip"><span class="film-chip-indicator" aria-hidden="true">●</span> '+words(labels.chip)+'</span></div>'+
+  '<div class="film-showcase">'+cards+'</div><p class="film-disclaimer">'+words(labels.note)+'</p>'+
+  '</div></section>'+
+  '<dialog class="film-dialog" id="solar-film-dialog" aria-label="'+words(labels.cta)+'"><div class="film-dialog-inner">'+
+  '<button type="button" class="film-close" aria-label="'+words(labels.close)+'" id="close-solar-film">✕</button>'+
+  '<div class="film-player-shell"><video id="solar-real-video" controls playsinline preload="none" muted tabindex="0" aria-label="'+words(labels.cta)+'"></video></div>'+
+  '<p class="film-playback-error" id="solar-film-error" role="status" hidden>'+words(labels.error)+'</p>'+
+  '<div class="film-dialog-footer"><span id="solar-film-title">'+words(labels.one)+'</span><a id="solar-film-source" href="'+sources[0].page+'" target="_blank" rel="noopener noreferrer">'+words(labels.direct)+' ↗</a></div></div></dialog>';
 }
 
 function page(t,locale,slug){
@@ -262,4 +270,5 @@ await write("manifest.webmanifest",JSON.stringify({name:"Artzi Energy — ארצ
 await write("robots.txt","User-agent: *\nDisallow: /\nSitemap: "+baseUrl+"/sitemap.xml\n");
 await write("sitemap.xml",'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+allLinks.map(x=>'<url><loc>'+baseUrl+x+'</loc></url>').join('')+'</urlset>');
 await write("sw.js",'const CACHE="artzi-preview-v1";const urls=["/","/he/","/en/","/styles.css","/app.js"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(urls)));self.skipWaiting()});self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});self.addEventListener("fetch",e=>{if(e.request.method!=="GET"||new URL(e.request.url).origin!==location.origin)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{})}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match("/he/"))))})');
+await import("./download-solar-footage.mjs");
 console.log(JSON.stringify({routesPerLocale:routes.length,totalHtml:allLinks.length,assets:8}));
