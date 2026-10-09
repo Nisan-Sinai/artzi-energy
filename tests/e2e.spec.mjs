@@ -270,3 +270,48 @@ test("solar atelier has no document overflow on typical phone widths and accessi
   }
  }
 });
+
+
+test("cinematic solar video opens in a real accessible player only after click",async({page})=>{
+ for(const lang of ["he","en"]){
+  await page.goto("/"+lang+"/");
+  const preview=page.locator("#open-solar-film");
+  const dialog=page.locator("#solar-film-dialog");
+  const player=page.locator("#solar-film-video");
+  await expect(preview).toBeVisible();
+  await expect(dialog).not.toBeVisible();
+  expect(await player.getAttribute("src")).toBeNull();
+  await preview.click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute("open","");
+  await expect(player).toHaveAttribute("controls","");
+  expect(await player.getAttribute("src")).toContain("upload.wikimedia.org/wikipedia/commons/");
+  await expect(page.locator("#close-solar-film")).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect.poll(()=>player.getAttribute("src")).toBeNull();
+  await expect(preview).toBeFocused();
+  await preview.click();
+  await expect(dialog).toBeVisible();
+  await page.locator("#close-solar-film").click();
+  await expect(dialog).not.toBeVisible();
+ }
+});
+test("solar film section stays responsive and uses a stock-footage disclosure",async({page})=>{
+ for(const width of [320,375,390,768,1024,1440]){
+  await page.setViewportSize({width,height:850});
+  await page.goto("/he/");
+  const box=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
+  expect(box.scroll,"Video showcase overflow at "+width+"px").toBeLessThanOrEqual(box.viewport+2);
+  await expect(page.locator(".film-disclaimer")).toContainText("להמחשה בלבד");
+ }
+});
+
+
+test("solar showcase footage host responds with video instead of a broken URL",async({request})=>{
+ const url="https://upload.wikimedia.org/wikipedia/commons/a/a2/20240408-USDA-RD-TX-LSC-FX3-0710%2815X%29.webm";
+ const response=await request.head(url,{timeout:30000});
+ expect(response.status(),"Solar media unavailable: "+url).toBeLessThan(400);
+ const type=response.headers()["content-type"]||"";
+ expect(type).toMatch(/video|octet-stream/i);
+});
