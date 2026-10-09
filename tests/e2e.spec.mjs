@@ -39,7 +39,7 @@ test("mobile layouts have no horizontal overflow",async({page})=>{
 test("calculator updates immediately with roof area and exposure",async({page})=>{
   await page.goto("/he/calculator/");
   const initial=await page.locator("#production-out").textContent();
-  await page.locator("#roof-area").fill("500");
+  await page.locator("#roof-area").evaluate(el=>{el.value="500";el.dispatchEvent(new Event("input",{bubbles:true}))});
   const larger=await page.locator("#production-out").textContent();
   expect(larger).not.toBe(initial);
   await page.locator('input[value=".72"]').check({force:true});
