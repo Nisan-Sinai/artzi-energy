@@ -131,12 +131,42 @@ function journalFeature(t,locale){
  return '<section class="journal-feature section" aria-labelledby="journal-feature-heading"><div class="container"><div class="journal-feature-head"><div><span class="eyebrow">ARTZI / KNOWLEDGE LAB / 005</span><h2 id="journal-feature-heading">'+(he?'לא רק שמש.<br><em>גם ידע.</em>':'Not just sunlight.<br><em>Insight.</em>')+'</h2></div><div><p>'+words(t.journalDesc)+'</p>'+btn(locale,"insights",he?"למגזין המלא":"Explore the journal","dark")+'</div></div><div class="journal-feature-grid"><a class="journal-large" href="'+url(locale,"insights/"+lead[0])+'">'+image(2,"")+'<span class="journal-overlay"><span class="eyebrow">FEATURED / 01</span><strong>'+words(lead[he?2:3])+'</strong><span class="journal-more">'+words(t.read)+' ↗</span></span></a><div class="journal-small">'+articles(t,locale,3)+'</div></div></div></section>';
 }
 
+
+const solarFilmUrl="https://videos.pexels.com/video-files/2249554/2249554-hd_1920_1080_25fps.mp4";
+const solarFilmSource="https://www.pexels.com/video/solar-panels-on-rooftop-2249554/";
+function solarFilm(t,locale){
+ const he=locale==="he";
+ const playLabel=he?"נגן סרטון אנרגיה סולארית":"Play solar energy film";
+ const closeLabel=he?"סגירת הסרטון":"Close video";
+ const title=he?"אנרגיה שלא רק רואים.":"Energy you can see.";
+ const accent=he?"מרגישים.":"Feel it.";
+ const subtitle=he?"כמה שניות של השראה — גגות, אור וחשיבה חדשה.":"A visual story of rooftops, light and a brighter perspective.";
+ const note=he?"צילום מאגר להמחשה בלבד • אינו פרויקט של ארצי אנרגיה":"Illustrative stock footage • Not an Artzi Energy project";
+ const fallback=he?"הסרטון לא נפתח? לצפייה במקור":"Video unavailable? Open the source";
+ return '<section class="section film-section" aria-labelledby="film-title"><div class="container film-layout">'+
+ '<div class="film-copy"><span class="eyebrow">ARTZI / MOTION STORY — 006</span><h2 id="film-title">'+title+'<br><em>'+accent+'</em></h2><p>'+words(subtitle)+'</p>'+
+ '<div class="film-index"><span>01 <span aria-hidden="true">/</span> 03</span><span>INSPIRED BY LIGHT</span></div>'+
+ '<div class="film-points"><div><span class="film-number">01</span><span>'+(he?"מתחילים במבט אחר על הגג":"See the roof differently")+'</span></div><div><span class="film-number">02</span><span>'+(he?"מחברים אור, נתונים ותכנון":"Connect sunlight with smart planning")+'</span></div><div><span class="film-number">03</span><span>'+(he?"מכוונים לעתיד ארוך טווח":"Design for the long term")+'</span></div></div>'+
+ '<small class="film-disclaimer">'+note+'</small></div>'+
+ '<div class="film-showcase"><button type="button" class="film-preview" id="open-solar-film" aria-label="'+playLabel+'" aria-haspopup="dialog" aria-controls="solar-film-dialog">'+
+ '<span class="film-poster">'+image(5,he?"מערכת פאנלים סולאריים להמחשה":"Illustrative solar panels",true)+'</span>'+
+ '<span class="film-preview-overlay" aria-hidden="true"></span><span class="film-sweep" aria-hidden="true"></span><span class="film-crosshair film-crosshair-a" aria-hidden="true">+</span><span class="film-crosshair film-crosshair-b" aria-hidden="true">+</span>'+
+ '<span class="film-topline" aria-hidden="true"><span>ARTZI ENERGY</span><span>PLAY / FILM 01</span></span>'+
+ '<span class="film-preview-bottom"><span class="film-tagline">SOLAR<br><em>REIMAGINED.</em></span><span class="film-play" aria-hidden="true"><svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></span>'+
+ '</button><div class="film-caption"><span>'+note+'</span><span>WATCH THE FILM <span aria-hidden="true">↗</span></span></div></div>'+
+ '</div></section>'+
+ '<dialog class="film-dialog" id="solar-film-dialog" aria-label="'+playLabel+'" data-solar-film-url="'+solarFilmUrl+'">'+
+ '<div class="film-dialog-inner"><button type="button" class="film-close" aria-label="'+closeLabel+'" id="close-solar-film">✕</button>'+
+ '<video id="solar-film-video" controls playsinline preload="none" tabindex="0" aria-label="'+playLabel+'"></video>'+
+ '<div class="film-dialog-footer"><span>'+note+'</span><a href="'+solarFilmSource+'" target="_blank" rel="noopener noreferrer">'+fallback+' ↗</a></div></div></dialog>';
+}
+
 function page(t,locale,slug){
  if(!slug)return '<section class="hero cinematic-home"><div class="hero-image">'+image(0,"",false)+'</div><div class="hero-overlay"></div><div class="hero-orbit"></div><div class="hero-gridlines" aria-hidden="true"></div><div class="container hero-inner"><div class="hero-topline"><span class="eyebrow">THE NEXT ERA OF ENERGY</span><span class="hero-coordinates" aria-hidden="true">ARTZI / 001 — SOLAR</span></div><h1><span>'+words(t.hero[0])+'</span><em>'+words(t.hero[1])+'</em><span class="outline-text">'+words(t.hero[2])+'</span></h1><div class="hero-bottom"><p>'+words(t.heroDesc)+'</p><div class="actions">'+btn(locale,"quote",t.contact)+btn(locale,"solutions",t.discover,"glass")+'</div></div><div class="hero-edge"><span class="eyebrow">'+words(t.scroll)+' ↓</span><span class="eyebrow">DESIGNED TO GO FURTHER</span></div></div><div class="hero-ribbon" aria-hidden="true"><span>ENERGY / REIMAGINED</span><span>↗</span></div></section>'+
  '<div class="marquee premium-marquee" aria-hidden="true"><div>'+Array(6).fill('<span>POWER OF POSSIBILITY</span> ✳ <span>THINK ABOVE</span> ✳').join('')+'</div></div>'+
  visionPrinciples(t,locale)+
  '<section class="section vision"><div class="container split"><div class="vision-photo">'+image(1,"")+'<div class="vision-seal" aria-hidden="true">☼</div><span class="vision-caption">VISUAL EXPLORATION / SOLAR</span></div><div>'+heading(...t.vision,t.visionDesc,'00 / OUR PHILOSOPHY')+btn(locale,"about",t.discover,"dark")+'</div></div></section>'+
- cards(t,locale)+solarStory(t,locale)+rooftopStudio(t,locale)+techList(t,locale)+solarLab(t,locale)+journalFeature(t,locale);
+ cards(t,locale)+solarStory(t,locale)+solarFilm(t,locale)+rooftopStudio(t,locale)+techList(t,locale)+solarLab(t,locale)+journalFeature(t,locale);
  if(slug==="about")return heroPage(t,...t.vision,t.visionDesc,1,"VISION / ARTZI")+techList(t,locale);
  if(slug==="solutions")return heroPage(t,...t.solutions,t.solDesc,2,"OUR SOLUTIONS")+cards(t,locale);
  if(slug.startsWith("solutions/")){const x=t.services.find(s=>slug==="solutions/"+s[0]),i=t.services.indexOf(x);return heroPage(t,x[1],x[2],x[3],i+1,"SOLUTION / 0"+(i+1))+'<section class="section"><div class="container split"><div>'+heading(x[1],x[2],x[3],"DESIGNED TO FIT")+btn(locale,"quote",t.contact,"dark")+'</div>'+image(i+1,"")+'</div></section>'+techList(t,locale);}
